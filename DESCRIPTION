@@ -5,8 +5,8 @@ Version: 1.0
 Date: 2020-06-15
 Author: Niek de Schipper 
 Maintainer: Niek de Schipper <ncdeschipper@gmail.com>
-Description: test test test it does test 
-License: MIT 
+Description: An R package for regularized weight based SCA and PCA 
+License: GPL (>=2) 
 Imports: 
     Rcpp (>= 1.0.4.6),
     gtools,
