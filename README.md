@@ -15,7 +15,7 @@ devtools::install_github("trbKnl/sparseWeightBasedPCA")
 ```
 
 ## Version
-1.0
+0.1
 
 ## License
 GPL (>=2)

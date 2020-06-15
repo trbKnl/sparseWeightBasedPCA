@@ -1,7 +1,7 @@
 Package: sparseWeightBasedPCA
 Type: Package
 Title: Sparse weight based PCA 
-Version: 1.0
+Version: 0.1 
 Date: 2020-06-15
 Author: Niek de Schipper 
 Maintainer: Niek de Schipper <ncdeschipper@gmail.com>
