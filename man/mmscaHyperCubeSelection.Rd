@@ -69,5 +69,50 @@ A function that performs model selection for the regularizers of mmsca(). This f
 }
 \examples{
  
-# USE COMMENTED OUT CODE B ELOW THIS FUNCTION
+# Example select the lasso and ridge parameter for mmsca()
+# create sample data
+ncomp <- 3 
+J <- 30
+comdis <- matrix(1, J, ncomp)
+
+comdis <- sparsify(comdis, 0.5) #set 50 percent of the 1's to zero
+variances <- makeVariance(varianceOfComps = c(100, 80, 90), J = J, error = 0.05) #create realistic eigenvalues
+dat <- makeDat(n = 100, comdis = comdis, variances = variances)
+X <- dat$X
+
+#Note: can take some time
+results <- mmscaHyperCubeSelection(X,
+              ncomp = 3,
+              ridgeSeq = 0:3,
+              lassoSeq = 0:10,
+              grouplassoSeq = 0,
+              elitistlassoSeq = 0,
+              stepsize = 5,
+              logscale = FALSE,
+              groups = ncol(X),
+              nStart = 1,
+              itr = 100000,
+              printProgress = TRUE,
+              coorDes = FALSE,
+              coorDesItr = 1,
+              method = "CV1stdError",
+              tol = 10e-5,
+              nrFolds = 10)
+
+#fit the model with the selected hyper parameters
+fit <- mmsca(X = X, 
+    ncomp = ncomp, 
+    ridge = results$ridge,
+    lasso = results$lasso,
+    grouplasso = results$grouplasso,
+    elitistlasso = results$elitistlasso,
+    groups = ncol(X), 
+    constraints = matrix(1, J, ncomp), 
+    itr = 1000000, 
+    Wstart = matrix(0, J, ncomp))
+
+#inspect the results
+fit$W
+dat$P[, 1:ncomp]
+
 }

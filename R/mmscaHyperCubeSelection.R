@@ -72,7 +72,52 @@ determineRange <- function(best, range, stepsize, logscale){
 #' \code{elitistlasso} A vector with ncomp elements all equal to the chosen ridge value \cr
 #' @examples
 #'  
-#' # USE COMMENTED OUT CODE B ELOW THIS FUNCTION
+#' # Example select the lasso and ridge parameter for mmsca()
+#' # create sample data
+#' ncomp <- 3 
+#' J <- 30
+#' comdis <- matrix(1, J, ncomp)
+#' 
+#' comdis <- sparsify(comdis, 0.5) #set 50 percent of the 1's to zero
+#' variances <- makeVariance(varianceOfComps = c(100, 80, 90), J = J, error = 0.05) #create realistic eigenvalues
+#' dat <- makeDat(n = 100, comdis = comdis, variances = variances)
+#' X <- dat$X
+#' 
+#' #Note: can take some time
+#' results <- mmscaHyperCubeSelection(X,
+#'               ncomp = 3,
+#'               ridgeSeq = 0:3,
+#'               lassoSeq = 0:10,
+#'               grouplassoSeq = 0,
+#'               elitistlassoSeq = 0,
+#'               stepsize = 5,
+#'               logscale = FALSE,
+#'               groups = ncol(X),
+#'               nStart = 1,
+#'               itr = 100000,
+#'               printProgress = TRUE,
+#'               coorDes = FALSE,
+#'               coorDesItr = 1,
+#'               method = "CV1stdError",
+#'               tol = 10e-5,
+#'               nrFolds = 10)
+#' 
+#' #fit the model with the selected hyper parameters
+#' fit <- mmsca(X = X, 
+#'     ncomp = ncomp, 
+#'     ridge = results$ridge,
+#'     lasso = results$lasso,
+#'     grouplasso = results$grouplasso,
+#'     elitistlasso = results$elitistlasso,
+#'     groups = ncol(X), 
+#'     constraints = matrix(1, J, ncomp), 
+#'     itr = 1000000, 
+#'     Wstart = matrix(0, J, ncomp))
+#' 
+#' #inspect the results
+#' fit$W
+#' dat$P[, 1:ncomp]
+#' 
 #' @export
 mmscaHyperCubeSelection <- function(X, ncomp, ridgeSeq, lassoSeq, grouplassoSeq,
           elitistlassoSeq, stepsize, logscale = FALSE, 
@@ -223,70 +268,3 @@ mmscaHyperCubeSelection <- function(X, ncomp, ridgeSeq, lassoSeq, grouplassoSeq,
 
 
 
-
-#p <- 30
-#comdis <- matrix(1, p, 3)
-#comdis <- sparsify(comdis, 0.2)
-#variances <- makeVariance(c(200, 200, 150), p, 0.01) 
-#dat <- makeDat(n = 100, p = p,  ncomp = 3, comdis = comdis, variances = variances)
-#X <- dat$X
-#
-#
-#X <- matrix(rnorm(100 * 10), 100, 10)
-#J <- ncol(X) 
-#ncomp <- 10
-#
-#
-#X <- matrix(rnorm(100 * 10), 100, 10)
-#J <- ncol(X) 
-#ncomp <- 3
-#
-#source("./makeData.R")
-#
-#p <- 100
-#J <- 100
-#comdis <- matrix(1, p, 3)
-#comdis <- sparsify(comdis, 0.7)
-#variances <- makeVariance(c(100, 100, 100), p, 0.05) 
-#dat <- makeDat(n = 100, p = p,  ncomp = 3, comdis = comdis, variances = variances)
-#X <- dat$X
-#
-#
-#mmscaHyperCubeSelection(X,
-#          ncomp = 3,
-#          ridgeSeq = 0,
-#          lassoSeq = 0:10,
-#          grouplassoSeq = 0,
-#          elitistlassoSeq = 0,
-#          stepsize = 2,
-#          logscale = FALSE,
-#          groups = ncol(X),
-#          nStart = 1,
-#          itr = 100000,
-#          printProgress = TRUE,
-#          coorDes = FALSE,
-#          coorDesItr = 1,
-#          method = "BIC",
-#          tol = 10e-5,
-#          nrFolds = 10)
-#
-#
-#results <- mmsca(X, ridge = rep(0, ncomp), lasso = rep(14, ncomp), constraints = matrix(1, J, ncomp), grouplasso = rep(0, ncomp),
-#           elitistlasso = rep(0, ncomp), groups = J, ncomp = ncomp, nStart = 1,
-#           itr = 100000, Wstart = matrix(0, J, ncomp), coorDes = FALSE, coorDesItr = 1, tol =10e-5)
-#
-#
-#round(results$W, 3)
-#round(dat$P[, 1:3], 3)
-#
-#
-#asdasd <- 1:100
-#
-#
-#which.max(c(1, rnorm(10), 100, 100))
-#
-#
-#banaan <- list(1:2, 3:4, 1:0)
-#
-#cat("asd", min(banaan[[1]])) 
-#
