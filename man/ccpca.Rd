@@ -53,4 +53,28 @@ X <- matrix(rnorm(I*J), I, J)
 
 ccpca(X = X, ncomp = ncomp,  nzeros = c(10, 20, 30), itr = 100000, 
      Wstart = matrix(0, J, ncomp), nStarts = 1, tol = 10^-8, printLoss = TRUE)
+
+# Extended example: Perform CCPCA, with oracle information
+# create sample data
+ncomp <- 3 
+J <- 30
+comdis <- matrix(1, J, ncomp)
+
+comdis <- sparsify(comdis, 0.5) #set 10 percent of the 1's to zero
+variances <- makeVariance(varianceOfComps = c(100, 80, 90), J = J, error = 0.05) #create realistic eigenvalues
+dat <- makeDat(n = 100, comdis = comdis, variances = variances)
+X <- dat$X
+
+#check how many zero's are in the data generating model
+nzeros <- apply(dat$P[, 1:ncomp], 2, function(x) {return(sum(x == 0))} )
+nzeros
+
+#run the analysis with oracle information of the exact number of zero's in the component weights 
+results <- ccpca(X = X, ncomp = ncomp,  nzeros = nzeros, itr = 10000000, 
+      Wstart = matrix(0, J, ncomp), nStarts = 1, tol = 10^-8, printLoss = TRUE)
+
+#inspect the results
+head(results$W) 
+head(dat$P[, 1:ncomp])
+
 }

@@ -221,6 +221,36 @@ std::vector<arma::uvec> makeConstraints(const arma::mat &constraints, const int 
 //'        itr = 1000000, 
 //'        Wstart = matrix(0, J, ncomp))
 //'
+//' # Extended example: Perform SCA with group lasso regularization try out all common dinstinctive structures
+//' # create sample data, with common and distinctive structure
+//' ncomp <- 3 
+//' J <- 30
+//' comdis <- matrix(1, J, ncomp)
+//' comdis[1:15, 1] <- 0 
+//' comdis[15:30, 2] <- 0 
+//' 
+//' comdis <- sparsify(comdis, 0.1) #set 10 percent of the 1's to zero
+//' variances <- makeVariance(varianceOfComps = c(100, 80, 90), J = J, error = 0.05) #create realistic eigenvalues
+//' dat <- makeDat(n = 100, comdis = comdis, variances = variances)
+//' X <- dat$X
+//' 
+//' results <- mmsca(X = X, 
+//'     ncomp = ncomp, 
+//'     ridge = rep(10e-8, ncomp),
+//'     lasso = rep(0, ncomp),
+//'     grouplasso = rep(5, ncomp),
+//'     elitistlasso = rep(0, ncomp),
+//'     groups = c(J/2, J/2), 
+//'     constraints = matrix(1, J, ncomp), 
+//'     itr = 1000000, 
+//'     Wstart = matrix(0, J, ncomp))
+//' 
+//' #inspect results
+//' results$W
+//' dat$P[, 1:ncomp]
+//' 
+//' #for model selection functions see mmscaModelSelection() and mmscaHyperCubeSelection()
+//' 
 // [[Rcpp::export]]
 Rcpp::List mmsca(const arma::mat& X, const int& ncomp, const arma::vec& ridge, const arma::vec& lasso,  const arma::vec& grouplasso, 
         const arma::vec& elitistlasso, arma::uvec& groups, const arma::mat& constraints, const int& itr,

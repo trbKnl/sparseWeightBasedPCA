@@ -28,6 +28,30 @@
 #' 
 #' ccpca(X = X, ncomp = ncomp,  nzeros = c(10, 20, 30), itr = 100000, 
 #'      Wstart = matrix(0, J, ncomp), nStarts = 1, tol = 10^-8, printLoss = TRUE)
+#' 
+#' # Extended example: Perform CCPCA, with oracle information
+#' # create sample data
+#' ncomp <- 3 
+#' J <- 30
+#' comdis <- matrix(1, J, ncomp)
+#' 
+#' comdis <- sparsify(comdis, 0.5) #set 10 percent of the 1's to zero
+#' variances <- makeVariance(varianceOfComps = c(100, 80, 90), J = J, error = 0.05) #create realistic eigenvalues
+#' dat <- makeDat(n = 100, comdis = comdis, variances = variances)
+#' X <- dat$X
+#' 
+#' #check how many zero's are in the data generating model
+#' nzeros <- apply(dat$P[, 1:ncomp], 2, function(x) {return(sum(x == 0))} )
+#' nzeros
+#' 
+#' #run the analysis with oracle information of the exact number of zero's in the component weights 
+#' results <- ccpca(X = X, ncomp = ncomp,  nzeros = nzeros, itr = 10000000, 
+#'       Wstart = matrix(0, J, ncomp), nStarts = 1, tol = 10^-8, printLoss = TRUE)
+#' 
+#' #inspect the results
+#' head(results$W) 
+#' head(dat$P[, 1:ncomp])
+#' 
 ccpca <- function(X, ncomp, nzeros, itr, Wstart, nStarts = 1L, tol = 10e-8, printLoss = TRUE) {
     .Call(`_sparseWeightBasedPCA_ccpca`, X, ncomp, nzeros, itr, Wstart, nStarts, tol, printLoss)
 }
@@ -74,6 +98,36 @@ ccpca <- function(X, ncomp, nzeros, itr, Wstart, nStarts = 1L, tol = 10e-8, prin
 #'        itr = 1000000, 
 #'        Wstart = matrix(0, J, ncomp))
 #'
+#' # Extended example: Perform SCA with group lasso regularization try out all common dinstinctive structures
+#' # create sample data, with common and distinctive structure
+#' ncomp <- 3 
+#' J <- 30
+#' comdis <- matrix(1, J, ncomp)
+#' comdis[1:15, 1] <- 0 
+#' comdis[15:30, 2] <- 0 
+#' 
+#' comdis <- sparsify(comdis, 0.1) #set 10 percent of the 1's to zero
+#' variances <- makeVariance(varianceOfComps = c(100, 80, 90), J = J, error = 0.05) #create realistic eigenvalues
+#' dat <- makeDat(n = 100, comdis = comdis, variances = variances)
+#' X <- dat$X
+#' 
+#' results <- mmsca(X = X, 
+#'     ncomp = ncomp, 
+#'     ridge = rep(10e-8, ncomp),
+#'     lasso = rep(0, ncomp),
+#'     grouplasso = rep(5, ncomp),
+#'     elitistlasso = rep(0, ncomp),
+#'     groups = c(J/2, J/2), 
+#'     constraints = matrix(1, J, ncomp), 
+#'     itr = 1000000, 
+#'     Wstart = matrix(0, J, ncomp))
+#' 
+#' #inspect results
+#' results$W
+#' dat$P[, 1:ncomp]
+#' 
+#' #for model selection functions see mmscaModelSelection() and mmscaHyperCubeSelection()
+#' 
 mmsca <- function(X, ncomp, ridge, lasso, grouplasso, elitistlasso, groups, constraints, itr, Wstart, tol = 10e-8, nStarts = 1L, printLoss = TRUE, coorDes = FALSE, coorDesItr = 1L) {
     .Call(`_sparseWeightBasedPCA_mmsca`, X, ncomp, ridge, lasso, grouplasso, elitistlasso, groups, constraints, itr, Wstart, tol, nStarts, printLoss, coorDes, coorDesItr)
 }

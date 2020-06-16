@@ -151,7 +151,7 @@ mmscaHyperCubeSelection <- function(X, ncomp, ridgeSeq, lassoSeq, grouplassoSeq,
                     criterion[i] <- index$BIC
             } else if (method == "CV") {
                     if (is.null(nrFolds)) {stop("Argument number of folds: nrFolds is missing")}
-                    index <- CVforPCAwithSparseWeights(X, ncomp, nrFolds = nrFolds, FUN = mmsca, 
+                    index <- CVforPCAwithSparseWeights(X, nrFolds = nrFolds, FUN = mmsca, 
                                            ridge = combs[[1]][i, ],
                                            lasso = combs[[2]][i, ],
                                            constraints = matrix(1, p, ncomp),
@@ -169,7 +169,7 @@ mmscaHyperCubeSelection <- function(X, ncomp, ridgeSeq, lassoSeq, grouplassoSeq,
                     criterion[i] <- index$MSPE
             } else if (method == "CV1stdError") {
                     if (is.null(nrFolds)) {stop("Argument number of folds: nrFolds is missing")}
-                    index <- CVforPCAwithSparseWeights(X, ncomp, nrFolds = nrFolds, FUN = mmsca, 
+                    index <- CVforPCAwithSparseWeights(X, nrFolds = nrFolds, FUN = mmsca, 
                                            ridge = combs[[1]][i, ],
                                            lasso = combs[[2]][i, ],
                                            constraints = matrix(1, p, ncomp),
