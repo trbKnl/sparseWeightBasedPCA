@@ -3,7 +3,6 @@
 #' A function that returns the mean squared prediction error (MSPE) given a set of tuning parameters and a sparse weight based PCA method 
 #'
 #' @param X A data matrix of class 'matrix'
-#' @param ncomp An integer specifying the number of components
 #' @param FUN A pointer to a function (i.e. the function name with no brackets) that performs sparse weight based PCA. it should return a list containing a matrix object called "W" that contains the component weights 
 #' @param ... specify all the arguments the function in FUN needs 
 #' @return The following items in a list \cr
@@ -13,7 +12,7 @@
 #' @examples
 #'  
 #' @export
-CVforPCAwithSparseWeights <- function(X, ncomp, nrFolds, FUN, ...)  {
+CVforPCAwithSparseWeights <- function(X, nrFolds, FUN, ...)  {
 
     folds <- rep_len(1:nrFolds, nrow(X))
     cvError  <- matrix(NA, nrow(X), ncol(X))

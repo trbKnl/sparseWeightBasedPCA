@@ -4,12 +4,10 @@
 \alias{CVforPCAwithSparseWeights}
 \title{Cross-validation with the EigenVector method (CV) for sparse weight based PCA methods}
 \usage{
-CVforPCAwithSparseWeights(X, ncomp, nrFolds, FUN, ...)
+CVforPCAwithSparseWeights(X, nrFolds, FUN, ...)
 }
 \arguments{
 \item{X}{A data matrix of class 'matrix'}
-
-\item{ncomp}{An integer specifying the number of components}
 
 \item{FUN}{A pointer to a function (i.e. the function name with no brackets) that performs sparse weight based PCA. it should return a list containing a matrix object called "W" that contains the component weights}
 

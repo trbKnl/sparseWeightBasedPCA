@@ -31,6 +31,57 @@
 //' scads(X, ncomp = ncomp, ridge = 10e-8, lasso = rep(1, ncomp), 
 //'         constraints = constraints, Wstart = matrix(0, ncomp, J))
 //'         
+//' # Extended examples:
+//' # Example 1: Perform PCA with elistastic net regularization no constraints 
+//' #create sample dataset
+//' ncomp <- 3 
+//' J <- 30
+//' comdis <- matrix(1, J, ncomp)
+//' comdis <- sparsify(comdis, 0.7) #set 70% of the 1's to zero
+//' variances <- makeVariance(varianceOfComps = c(100, 80, 70), J = J, error = 0.05) #create realistic eigenvalues
+//' dat <- makeDat(n = 100, comdis = comdis, variances = variances)
+//' X <- dat$X
+//' 
+//' results <- scads(X = X, ncomp = ncomp, ridge = 0.1, lasso = rep(0.1, ncomp),
+//'                 constraints = matrix(1, J, ncomp), Wstart = matrix(0, J, ncomp),
+//'                 itr = 100000, nStarts = 1, printLoss = TRUE , tol = 10^-8)
+//' 
+//' head(results$W) #inspect results of the estimation
+//' head(dat$P[, 1:ncomp]) #inspect data generating model
+//' 
+//' 
+//' # Example 2: Perform SCA with lasso regularization try out all common dinstinctive structures
+//' # create sample data, with common and distinctive structure
+//' ncomp <- 3 
+//' J <- 30
+//' comdis <- matrix(1, J, ncomp)
+//' comdis[1:15, 1] <- 0 
+//' comdis[15:30, 2] <- 0 
+//' 
+//' comdis <- sparsify(comdis, 0.2) #set 20 percent of the 1's to zero
+//' variances <- makeVariance(varianceOfComps = c(100, 80, 90), J = J, error = 0.05) #create realistic eigenvalues
+//' dat <- makeDat(n = 100, comdis = comdis, variances = variances)
+//' X <- dat$X
+//' 
+//' #generate all possible common and distinctive structures
+//' allstructures <- allCommonDistinctive(vars = c(15, 15), ncomp = 3, allPermutations = TRUE, filterZeroSegments = TRUE)
+//' 
+//' #Use cross-validation to look for the data generating structure 
+//' index <- rep(NA, length(allstructures))
+//' for (i in 1:length(allstructures)) {
+//'     print(i)
+//'     index[i] <- CVforPCAwithSparseWeights(X = X, nrFolds = 10, FUN = scads, ncomp, ridge = 0, lasso = rep(0.01, ncomp),
+//'                 constraints = allstructures[[i]], Wstart = matrix(0, J, ncomp),
+//'                 itr = 100000, nStarts = 1, printLoss = FALSE, tol = 10^-5)$MSPE
+//' }
+//' 
+//' #Do the analysis with the "winning" structure
+//' results <- scads(X = X, ncomp = ncomp, ridge = 0.1, lasso = rep(0.1, ncomp),
+//'                 constraints = allstructures[[which.min(index)]], Wstart = matrix(0, J, ncomp),
+//'                 itr = 100000, nStarts = 1, printLoss = TRUE , tol = 10^-5)
+//' 
+//' head(results$W) #inspect results of the estimation
+//' head(dat$P[, 1:ncomp]) #inspect data generating model
 //' @references
 //' De Schipper, N. C., & Van Deun, K. (2018). Revealing the Joint Mechanisms in Traditional Data Linked With Big 					Data. Zeitschrift Für Psychologie, 226(4), 212–231. doi:10.1027/2151-2604/a000341
 // [[Rcpp::export]]
