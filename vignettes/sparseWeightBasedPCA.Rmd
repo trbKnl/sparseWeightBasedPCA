@@ -4,6 +4,8 @@ author: "Niek C. de Schipper <n.c.deschipper@uvt.nl>"
 geometry: margin=1cm
 date: "`r Sys.Date()`"
 output:
+    html_document:
+        keep_md: true
     pdf_document:
         toc: true
     github_document:
