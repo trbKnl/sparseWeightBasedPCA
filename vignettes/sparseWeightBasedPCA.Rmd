@@ -4,12 +4,12 @@ author: "Niek C. de Schipper <n.c.deschipper@uvt.nl>"
 geometry: margin=1cm
 date: "`r Sys.Date()`"
 output:
-  rmarkdown::html_vignette:
-    toc: true
-  pdf_document:
-    toc: true
-  github_document:
-    toc: true
+    pdf_document:
+        toc: true
+    github_document:
+        toc: true
+    rmarkdown::html_vignette:
+        toc: true
 vignette: >
   %\VignetteIndexEntry{bayespca Package}
   %\VignetteEngine{knitr::rmarkdown}
@@ -24,7 +24,7 @@ vignette: >
 Principal Components Analysis (PCA) allows performing dimensionality reduction via matrix factorization.
 
 While there are several ways to express a PCA model, in what follows will we consider the formulation
-$$ \mathbf{X} = \mathbf{X} W P^T + E, $$
+$$ \mathbf{X} = \mathbf{X} \mathbf{W} \mathbf{P}^T + \mathbf{E} $$
 where X is a $I \times J$ data matrix ($I$ is the number of units; $J$ the number of
 continuous variables); $W$ is a $J \times D$ weight matrix ($D \leq J$ is the rank of the reduced matrix);
 $P$ is the orthogonal loading matrix, such that $P^T P = I$; and $E$ is an $I \times J$ error matrix. 
@@ -35,7 +35,7 @@ The `sparseWeightBasedPCA` package performs the following tasks:
 2. Task 2
 3. Task 3
 
-## The `bayespca` package
+## The `sparseWeightBasedPCA` package
 
 ```{r}
 set.seed(1)
