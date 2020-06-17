@@ -12,5 +12,9 @@ Imports:
     gtools,
     MASS
 LinkingTo: Rcpp, RcppArmadillo
+Suggests:
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
 Encoding: UTF-8
 RoxygenNote: 7.1.0
