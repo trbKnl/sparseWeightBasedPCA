@@ -18,18 +18,46 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-
-
 # sparseWeightBasedPCA: A package for Regularized weight based Simultaneous Component Analysis (SCA) and Principal Component Analysis (PCA)
 
 ## Theoretical background
-Principal Components Analysis (PCA) allows performing dimensionality reduction via matrix factorization.
+Principal component analysis (PCA) is a widely used analysis technique for data reduction. It can give crucial insights in the underlying structure of the data when used as a latent variable model.
 
-While there are several ways to express a PCA model, in what follows will we consider the formulation
-$$ \mathbf{X} = \mathbf{X} \mathbf{W} \mathbf{P}^T + \mathbf{E} $$
-where X is a $I \times J$ data matrix ($I$ is the number of units; $J$ the number of
-continuous variables); $W$ is a $J \times D$ weight matrix ($D \leq J$ is the rank of the reduced matrix);
-$P$ is the orthogonal loading matrix, such that $P^T P = I$; and $E$ is an $I \times J$ error matrix. 
+Given a data matrix $\mathbf{X}$ that contains the scores for $i = 1...I$ observations on $j = 1...J$ variables; we follow the convention to present the $J$ variable scores of observation $i$ in row $i$ and thus $\mathbf{X}$ has size $I \times J$. PCA decomposes the data into $Q$ components as follows,
+\begin{equation}
+    \label{PCA}
+    \begin{aligned}
+        &\mathbf{X} = \mathbf{XWP}^T + \mathbf{E} \\
+        &\text{subject to } \mathbf{P}^T\mathbf{P} = \mathbf{I},
+      \end{aligned}
+\end{equation}
+where $\mathbf{W}$ is a $J \times Q$ component weight matrix, $\mathbf{P}$ is a $J \times Q$ loading matrix and $\mathbf{E}$ is a $I \times J$ residual matrix. The component weight matrix $\mathbf{W}$ will be the focus of this package, note that $\mathbf{XW}$ represent the component scores. 
+
+The decomposition in \ref{PCA}  can be extended to the case of multi-block data by taking $\mathbf{X} = [\mathbf{X}_{1} \hdots \mathbf{X}_{K}]$; this is concatenating the $K$ data blocks composed of different sets of variables for the same observation units. The decomposition of $\mathbf{X}$ has the same block structured decomposition with $\mathbf{W} = [\mathbf{W}^{T}_{1} \hdots \mathbf{W}^{T}_{K}]^{T}$ and  $\mathbf{P} = [\mathbf{P}^{T}_{1} \hdots \mathbf{P}^{T}_{K}]^{T}$. This multi-block formulation of PCA is known as simultaneous component analysis (SCA).
+
+Also in the multi-bock case $\mathbf{W}$ can be penalized to obtain sparse weights, we will call this variant sparse SCA When analyzing multi-block data with sparse SCA, we can search for blockwise structures in the component weights that tell us whether a component is uniquely determined by variables from one single data block (distinctive component), or whether it is a component that is determined by variables from multiple data blocks (common component). In other words, a distinctive component is a linear combination of variables of a particular data block only, whereas a common component is a linear combination of variables of multiple data blocks. An example of common and distinctive components in the situation with two data blocks is given below. The first two components are distinctive components, the third component is a common component, 
+\[ \mathbf{T}
+    =
+    \begin{bmatrix}
+        \mathbf{X}_1 & \mathbf{X}_2
+    \end{bmatrix}
+    \begin{bmatrix}
+        \mathbf{W}_1 \\
+        \mathbf{W}_2
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+        \mathbf{X}_1 & \mathbf{X}_2
+    \end{bmatrix}
+\begin{bmatrix}
+    0 & w_{1_{1}2} & w_{1_{1}3}   \\
+    0 & w_{2_{1}2} & w_{2_{1}3}   \\
+    0 & w_{3_{1}2} & w_{3_{1}3}  
+    \\[5pt]
+    w_{1_{2}1} & 0 & w_{1_{2}3} \\
+    w_{2_{2}1} & 0 & w_{2_{2}3} \\
+    w_{3_{2}1} & 0 & w_{2_{2}3} 
+\end{bmatrix}. \]
 
 The `sparseWeightBasedPCA` package performs the following tasks:
 
@@ -69,6 +97,14 @@ print(X)
 ## [19,]  0.82122120  1.10002537  0.5697196  0.074341324 -1.2246126
 ## [20,]  0.59390132  0.76317575 -0.1350546 -0.589520946 -0.4734006
 ```
+
+
+
+
+
+
+
+
 
 
 

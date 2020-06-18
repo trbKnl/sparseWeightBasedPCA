@@ -4,46 +4,179 @@ author: "Niek C. de Schipper <n.c.deschipper@uvt.nl>"
 geometry: margin=1cm
 date: "`r Sys.Date()`"
 output:
-    html_document:
-        keep_md: true
     pdf_document:
         toc: true
+    html_document:
+        keep_md: true
     github_document:
-        toc: true
+         toc: true
     rmarkdown::html_vignette:
         toc: true
 vignette: >
-  %\VignetteIndexEntry{bayespca Package}
+  %\VignetteIndexEntry{sparseWeightBasedPCA Package}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-
-
 # sparseWeightBasedPCA: A package for Regularized weight based Simultaneous Component Analysis (SCA) and Principal Component Analysis (PCA)
 
 ## Theoretical background
-Principal Components Analysis (PCA) allows performing dimensionality reduction via matrix factorization.
 
-While there are several ways to express a PCA model, in what follows will we consider the formulation
-$$ \mathbf{X} = \mathbf{X} \mathbf{W} \mathbf{P}^T + \mathbf{E} $$
-where X is a $I \times J$ data matrix ($I$ is the number of units; $J$ the number of
-continuous variables); $W$ is a $J \times D$ weight matrix ($D \leq J$ is the rank of the reduced matrix);
-$P$ is the orthogonal loading matrix, such that $P^T P = I$; and $E$ is an $I \times J$ error matrix. 
+### Principal Component Analysis
+Principal component analysis (PCA) is a widely used analysis technique for data reduction. It can give crucial insights in the underlying structure of the data when used as a latent variable model.
 
-The `sparseWeightBasedPCA` package performs the following tasks:
+Given a data matrix $\mathbf{X}$ that contains the scores for $i = 1...I$ observations on $j = 1...J$ variables; we follow the convention to present the $J$ variable scores of observation $i$ in row $i$ and thus $\mathbf{X}$ has size $I \times J$. PCA decomposes the data into $Q$ components as follows,
+\begin{equation}
+    \label{PCA}
+    \begin{aligned}
+        &\mathbf{X} = \mathbf{XWP}^T + \mathbf{E} \\
+        &\text{subject to } \mathbf{P}^T\mathbf{P} = \mathbf{I},
+      \end{aligned}
+\end{equation}
+where $\mathbf{W}$ is a $J \times Q$ component weight matrix, $\mathbf{P}$ is a $J \times Q$ loading matrix and $\mathbf{E}$ is a $I \times J$ residual matrix. The component weight matrix $\mathbf{W}$ will be the focus of this package, note that $\mathbf{T} = \mathbf{XW}$ represent the component scores. 
 
-1. Task 1
-2. Task 2
-3. Task 3
+The advantage of inspecting the component weights instead of the loadings is that you can directly derive meaning to $\mathbf{T}$, this because you see precisely in what way items in $\mathbf{X}$ are weighted together by $\mathbf{W}$.
 
-## The `sparseWeightBasedPCA` package
+
+### Simultaneous Component Analysis
+The decomposition in (\ref{PCA}) can be extended to the case of multi-block data by taking $\mathbf{X}_c = [\mathbf{X}_{1} \hdots \mathbf{X}_{K}]$; this is concatenating the $K$ data blocks composed of different sets of variables of size $J_k$ for the same units of observation. The decomposition of $\mathbf{X}_c$ has the same block structured decomposition as in (\ref{PCA}) with $\mathbf{W}_c = [\mathbf{W}^{T}_{1} \hdots \mathbf{W}^{T}_{K}]^{T}$ and  $\mathbf{P}_c = [\mathbf{P}^{T}_{1} \hdots \mathbf{P}^{T}_{K}]^{T}$. This multi-block formulation of PCA is known as simultaneous component analysis (SCA):
+\begin{equation}
+    \label{SCA}
+    \begin{aligned}
+        &[\mathbf{X}_{1} \hdots \mathbf{X}_{K}] = 
+            [\mathbf{X}_{1} \hdots \mathbf{X}_{K}]
+            [\mathbf{W}^{T}_{1} \hdots \mathbf{W}^{T}_{K}]^{T}
+            [\mathbf{P}^{T}_{1} \hdots \mathbf{P}^{T}_{K}] +  \mathbf{E} \\
+        &\text{subject to } 
+            [\mathbf{P}^{T}_{1} \hdots \mathbf{P}^{T}_{K}] 
+            [\mathbf{P}^{T}_{1} \hdots \mathbf{P}^{T}_{K}]^{T} = \mathbf{I}
+      \end{aligned}
+\end{equation}
+When analyzing multi-block data with SCA identifying meaningful relations between data blocks is of prime interest. In order to gain insight in what multiple data blocks relate to each other, we can search for blockwise structures in the component weights that tell us whether a component is uniquely determined by variables from one single data block (distinctive component), or whether it is a component that is determined by variables from multiple data blocks (common component). In other words, a distinctive component is a linear combination of variables of a particular data block only, whereas a common component is a linear combination of variables of multiple data blocks. An example of common and distinctive components in the situation with two data blocks is given below. The first two components are distinctive components, the third component is a common component, 
+\[ \mathbf{T}
+    =
+    \begin{bmatrix}
+        \mathbf{X}_1 & \mathbf{X}_2
+    \end{bmatrix}
+    \begin{bmatrix}
+        \mathbf{W}_1 \\
+        \mathbf{W}_2
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+        \mathbf{X}_1 & \mathbf{X}_2
+    \end{bmatrix}
+\begin{bmatrix}
+    0 & w_{1_{1}2} & w_{1_{1}3}   \\
+    0 & w_{2_{1}2} & w_{2_{1}3}   \\
+    0 & w_{3_{1}2} & w_{3_{1}3}  
+    \\[5pt]
+    w_{1_{2}1} & 0 & w_{1_{2}3} \\
+    w_{2_{2}1} & 0 & w_{2_{2}3} \\
+    w_{3_{2}1} & 0 & w_{2_{2}3} 
+\end{bmatrix}. \]
+
+The `sparseWeightBasedPCA` package will provide functions that perform PCA and SCA on the component weights. It will also provide function for selection of the hyper parameters of the model. We will now describe the core models of this package that will be estimated by the following functions.
+
+1. `scads` Regularized SCA with sparse component weights using constraints
+2. `mmsca` Regularized SCA with sparse component weights using the group LASSO
+3. `ccpca` PCA with sparse component weights using cardinality constraints
+
+## Models of the `sparseWeightBasedPCA` package
+
+### Regularized SCA with sparse component weights using constraints 
+
+Here we present an approach of performing regularized SCA, with ridge and LASSO regularization and block wise constraints on $\mathbf{W}_c$ by solving,
+\begin{equation}
+\label{scads}
+    \begin{aligned}
+        L(\mathbf{W}_c, \mathbf{P}_c)=&\|\mathbf{X}_c -\mathbf{X}_c\mathbf{W}_c\mathbf{P}^T_{c}\|^{2}_{2} 
+    + \lambda_L \| \mathbf{W}_c \|_{1} 
+    + \lambda_R \| \mathbf{W}_c \|^{2}_{2} \\
+        &\text{subject to } \mathbf{P}_c \mathbf{P}^{T}_c = \mathbf{I}, \text{ and } \lambda_L, \lambda_R \geq 0 \text{ and zero block constraints on } \mathbf{W}_c
+    \end{aligned}
+\end{equation}
+In order to get a minimum for (\ref{scads}) we alternate between the estimation of  $\mathbf{W}_c$ and $\mathbf{P}_c$. Given $\mathbf{W}_c$ we can estimate $\mathbf{P}_c$ by using procrustes rotation. Given $\mathbf{P}_c$ we find estimates for $\mathbf{W}_c$ by using a coordinate descent algorithm that works by soft-thresholding weights. For the specifics we refer the reader to (REF: NIEK KATRIJN). This iterative procedure stops when an optimum has been found (.i.e the loss function value is not decreasing anymore beyond pre-specified tolerance level). The optimization problem in (\ref{mmsca}) is non-convex and meaning there are local minima. In order to deal with that multiple random starts can be used with different initializations of $\mathbf{W}$, the start leading to the lowest evaluation of (\ref{mmsca}) is retained. Typically starting the algorithm with the solution of PCA (e.g. the first $Q$ right singular vectors of $\mathbf{X}$) will lead to smallest optimum.
+
+The main advantage of analyzing multi-block data by using this procedure is that it is fast, and scalable to large data sets. This is thanks to the coordinate descent implementation. The inclusion of the blockwise constraints on $\mathbf{W}$ make sure common and distinctive components are found and the LASSO and ridge regularizers are optional and facilitate extra sparsity within the component weights. A disadvantage of the method is that $Q, \lambda_L$, $\lambda_R$ and the common and distinctive structures for $\mathbf{W}$ need to be selected. This has to be done using model selection procedures and can be computationally demanding. I
+
+This procedure has been implemented in the `scads` function. This function will be discussed in detail in the next section and examples will be given outlining the analysis including model selection.
+
+### Regularized SCA with sparse component weights using the group LASSO
+
+Here we present a very flexible approach of performing regularized SCA using, ridge, LASSO, group LASSO and elitist LASSO regularization by solving:
+\begin{equation}
+\label{mmsca}
+    \begin{aligned}
+        L(\mathbf{W}_c, \mathbf{P}_c)=&\|\mathbf{X}_c -\mathbf{X}_c\mathbf{W}_c\mathbf{P}^T_{c}\|^{2}_{2} 
+    + \lambda_L \| \mathbf{W}_c \|_{1} 
+    + \lambda_R \| \mathbf{W}_c \|^{2}_{2} \\
+    &+ \sum_{q,k}(\lambda_{G} \sqrt{J_k}\| \mathbf{w}^{(k)}_{q} \|_{2}
+    + \lambda_E \| \mathbf{w}^{(k)}_{q} \|_{1,2}) \\
+        &\text{subject to } \mathbf{P}_c \mathbf{P}^{T}_c = \mathbf{I} \text{ and } \lambda_L, \lambda_R, \lambda_G, \lambda_E \geq 0
+    \end{aligned}
+\end{equation}
+where $\mathbf{W}_c = [(\mathbf{W}^{(1)})^{T} \hdots (\mathbf{W}^{(K)})^{T}]^{T}$, and $\mathbf{w}^{(k)}_{q}$ denotes the $q$th column from the submatrix $\mathbf{W}^{(k)}$.
+In order to get a minimum for (\ref{mmsca}) we alternate between the estimation of  $\mathbf{W}_c$ and $\mathbf{P}_c$. Given $\mathbf{W}_c$ we can estimate $\mathbf{P}_c$ by using procrustes rotation. Given $\mathbf{P}_c$ we can find estimates for $\mathbf{W}_c$ by using the majorization minimization (MM) algorithm. For the specifics we refer the reader to (REF: NIEK KATRIJN). This iterative procedure stops when an optimum has been found (.i.e the loss function value is not decreasing anymore beyond pre-specified tolerance level). The optimization problem in (\ref{mmsca}) is non-convex and meaning there are local minima. In order to deal with that multiple random starts can be used with different initializations of $\mathbf{W}$, the start leading to the lowest evaluation of (\ref{mmsca}) is retained. Typically starting the algorithm with the solution of PCA (e.g. the first $Q$ right singular vectors of $\mathbf{X}$) will lead to smallest optimum.
+
+The main advantage of solving (\ref{mmsca}) is that it can automatically look for common and distinctive components by taking advantage of the properties of the group lasso. Because the group LASSO is specified on the colored segments (see below), it will either include these segments or put them zero, uncovering common and distinctive components. This is especially useful if the number of blocks and components is large, and an exhaustive approach of identifying common and distinctive is too computationally intensive.
+\[ \mathbf{T}
+    =
+    \begin{bmatrix}
+        \mathbf{X}_1 & \mathbf{X}_2
+    \end{bmatrix}
+    \begin{bmatrix}
+        \mathbf{W}_1 \\
+        \mathbf{W}_2
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+        \mathbf{X}_1 & \mathbf{X}_2
+    \end{bmatrix}
+\begin{bmatrix}
+   \textcolor{blue}{w_{1_{1}1}}  & \textcolor{red}{w_{1_{1}2}} & \textcolor{orange}{w_{1_{1}3}}   \\
+   \textcolor{blue}{w_{2_{1}1}}  & \textcolor{red}{w_{2_{1}2}} & \textcolor{orange}{w_{2_{1}3}}   \\
+   \textcolor{blue}{w_{3_{1}1}}  & \textcolor{red}{w_{3_{1}2}} & \textcolor{orange}{w_{3_{1}3}}  
+    \\[5pt]
+    \textcolor{purple}{w_{1_{2}1}} &  \textcolor{green}{w_{1_{2}2}} & \textcolor{teal}{w_{1_{2}3}} \\
+    \textcolor{purple}{w_{2_{2}1}} &  \textcolor{green}{w_{2_{2}2}} & \textcolor{teal}{w_{2_{2}3}} \\
+    \textcolor{purple}{w_{3_{2}1}} &  \textcolor{green}{w_{3_{2}2}} & \textcolor{teal}{w_{2_{2}3}} 
+\end{bmatrix}. \]
+The inclusion the LASSO and ridge regularization are optional and facilitate extra sparsity within the colored segments. The elitist LASSO has a very special use case, the elitist LASSO will include all colored segments and will put weights within each segment to zero. The elitist lasso can be used to force components to be common. It is not advised to use the group LASSO and the elitist LASSO together as they have opposing goals. A disadvantage of using this procedure is that is potentially slow, this because its implemented using a MM-algorithm which tend to be slow in convergence. Also, the hyper parameters of the model need to be selected. 
+
+This procedure has been implemented in the `mmsca` function. This function will be discussed in detail in the next section and examples will be given outlining the analysis including model selection.
+
+### PCA with sparse component weights using cardinality constraints
+
+Here we present an approach of solving PCA by applying cardinality constraints to the component weights by solving:
+\begin{equation}
+\label{ccpca}
+\begin{aligned}
+        &L(\mathbf{W}, \mathbf{P})=\|\mathbf{X}-\mathbf{X}\mathbf{W}\mathbf{P}^T\|^{2}_{2} \\
+        &\text{subject to } \mathbf{W} \text{ including } K \text{ zeros}.
+\end{aligned}
+\end{equation}
+In order to get a minimum for (\ref{ccpca}) we need to alternate between the estimation of $\mathbf{W}$ and $\mathbf{P}$. Given $\mathbf{W}$ we can estimate $\mathbf{P}$ by using procruste rotation (REF: Ten_Berge_2005, Zou_2006), $\mathbf{P} = \mathbf{UV}^T$, where $\mathbf{U}$ and $\mathbf{V}$ are the left and right singular vectors of $\mathbf{X}^T\mathbf{XW}$. Given $\mathbf{P}$ we can find estimates for $\mathbf{W}$ given the cardinality constraints using the cardinality constraint regression algorithm for detail see (REF: NIEK KATRIJN). The optimization problem in (\ref{ccpca}) is non-convex and meaning there are local minima. In order to deal with that multiple random starts can be used with different initializations of $\mathbf{W}$, the start leading to the lowest evaluation of (\ref{ccpca}) is retained. Typically starting the algorithm with the solution of PCA (e.g. the first $Q$ right singular vectors of $\mathbf{X}$) will lead to smallest optimum.
+
+The main advantage of solving (\ref{ccpca}) is that this model tries to directly tackle the problem of finding the underlying subset of weights, in contrast to the usage of a penalty that shrinks the weights and also induces sparsity such as the LASSO. This approach can lead to better discovery of the underlying weights compared to LASSO (REF: NIEK KATRIJN). Another advantage is that you directly impose cardinality constraints on $\mathbf{W}$. This gives the user total control over the amount of sparsity. This can be desirable if there is already an idea about the level of sparsity in the final model. 
+ A disadvantage of using this procedure is that is potentially slow, this because the CCREG algorithm uses a MM-algorithm which tend to be slow in convergence. Another potential downside could be the absence of regularizers, they tend to shrink the variance of the estimators, leading to more efficient estimators. In noisy situations other procedures might outperform this procedure.
+
+This model has been implemented in the `ccpca` function. This function will be discussed in detail in the next section.
+
 
 ```{r}
 set.seed(1)
 X <- matrix(rnorm(100), 20, 5)
 print(X)
 ```
+
+
+
+
+
+
+
+
 
 
 
