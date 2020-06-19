@@ -48,8 +48,8 @@ makeP <- function(A){
 
 #' makeVariance: Create variances for the components in data generation
 #'
-#' A function that creates realistic variances for J components, the variances are the J eigenvalues of a I x J data matrix X. The variances of the first Q components are set by the user, the remaining J - Q variances 
-#' are decreasing on a reversed logscale. The error   
+#' A function that creates realistic variances for J components. The variances of the first Q components are set by the user, the remaining J - Q variances 
+#' are decreasing on a reversed log scale. 
 #'
 #' @param varianceOfcomp The variances of the first Q components of interest 
 #' @param J The total number of components (the number of variables) 
@@ -79,12 +79,12 @@ makeVariance <- function(varianceOfComps, J, error){
 
 #' Sparsify: shoots a percentage of zero's in non-zero elements of columns of a matrix
 #'
-#' Sparsify: set at random a percentage the non-zero elements of columns of a matrix to zero. This can be used to create a zerp structure for the component weights/loadings from which to simmulate data.
+#' At random set a percentage the non-zero elements of columns of a matrix to zero. This can be used to create a zero structure for the component weights/loadings from which to simulate data.
 #'
-#' @param comdis A data matrix of class 'matrix', with a common or distinctive structure. (i.e. zero and ones in prespecified locations)
-#' @param sparsity The percentage of non-zero elements in the columns of comdis that should be set to zero. This is a value between zero and 1
+#' @param comdis A data matrix of class \code{matrix}, with a common or distinctive structure. (i.e. zero and ones in pre specified locations)
+#' @param sparsity The percentage of non-zero elements in the columns of \code{comdis} that should be set to zero. This is a value between 0 and 1
 #' @return 
-#' A matrix with a percantage of the non-zero elments in comdis set to zero
+#' A matrix with a percentage of the non-zero elements in \code{comdis} set to zero
 #' @export
 #' @examples
 #' 
@@ -116,13 +116,13 @@ sparsify <- function(comdis, sparsity){
 #'
 #' @param n The number of objects the data should have 
 #' @param ncomp The number of components that are of interest
-#' @param comdis A matric specifying the zero structure of \eqn{W}, the data will have Q = ncol(comdis) "important components" and J = nrow(comdis) variables
+#' @param comdis A \code{matrix} specifying the zero structure of \eqn{W}, the data will have Q = \code{ncol(comdis)} "important components" and J = \code{nrow(comdis)} variables
 #' @param variances specifying the variances of the J components these are the J eigenvalues of \eqn{X^T X}  
 #' @return A list with the following items: \cr
-#' \code{X} A data matrix generated from MASS::mvrnorm() with a zero mean structure and Sigma = P \%*\% diag(variances) \%*\% t(P), emprical is set \code{FALSE} \cr
-#' \code{P} A matrix of dimension J x J, with the loadings/weights the first Q columns have the sparsity structure specified in comdis, the other Q-J columns are non-sparse. \cr
-#' \code{Sigma} The covariance matrix that is used to generate the data from Sigma = P \%*\% diag(variances) \%*\% t(P) \cr
-#' In case of faillure the function returns \code{NA}. The function can fail if the comdis structure specified in P is not possible, i.e. linear dependency
+#' \code{X} A data matrix generated from MASS::mvrnorm() with a zero mean structure and Sigma = P \%*\% diag(variances) \%*\% t(P), empirical is set \code{FALSE} \cr
+#' \code{P} A matrix of dimension J x J, with the loadings/weights the first Q columns have the sparsity structure specified in \code{comdis}, the other Q-J columns are non-sparse. \cr
+#' \code{Sigma} The covariance matrix that is used to generate the data from Sigma \code{= P \%*\% diag(variances) \%*\% t(P)} \cr
+#' In case of failure the function returns \code{NA}. The function can fail if the \code{comdis} structure specified in P is not possible, i.e. linear dependency
 #' 
 #' @export
 #' @examples

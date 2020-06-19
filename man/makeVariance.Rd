@@ -17,8 +17,8 @@ makeVariance(varianceOfComps, J, error)
 A vector with J variances (eigenvalues) to simulate data from.
 }
 \description{
-A function that creates realistic variances for J components, the variances are the J eigenvalues of a I x J data matrix X. The variances of the first Q components are set by the user, the remaining J - Q variances 
-are decreasing on a reversed logscale. The error
+A function that creates realistic variances for J components. The variances of the first Q components are set by the user, the remaining J - Q variances 
+are decreasing on a reversed log scale.
 }
 \examples{
 

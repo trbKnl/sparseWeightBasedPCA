@@ -2,10 +2,10 @@
 #'
 #' A function that returns the IS given a set of tuning parameters and a sparse weight based PCA method 
 #'
-#' @param X A data matrix of class 'matrix'
+#' @param X A data matrix of class \code{matrix}
 #' @param ncomp An integer specifying the number of components
-#' @param FUN A pointer to a function (i.e. the function name with no brackets) that performs sparse weight based PCA. it should return a list containing a matrix object called "W" that contains the component weights 
-#' @param ... specify all the arguments the function in FUN needs 
+#' @param FUN A pointer to a function (i.e. the function name with no brackets) that performs sparse weight based PCA. it should return a list containing a matrix object called \code{W} that contains the component weights 
+#' @param ... specify all the arguments the function in \code{FUN} needs 
 #' @return The following items in a list \cr
 #' \code{IS} The IS given the tuning parameters \cr
 #' \code{nNonZeroCoef} The number of non-zero coefficients in the model \cr

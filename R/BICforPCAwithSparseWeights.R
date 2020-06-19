@@ -1,10 +1,10 @@
 #' BIC for sparse weight based PCA methods 
 #'
-#' A function that returns the baysian information criterion (BIC) given a set of tuning parameters and a sparse weight based PCA method 
+#' A function that returns the Bayesian information criterion (BIC) given a set of tuning parameters and a sparse weight based PCA method 
 #'
 #' @param X A data matrix of class 'matrix'
 #' @param ncomp An integer specifying the number of components
-#' @param FUN A pointer to a function (i.e. the function name with no brackets) that performs sparse weight based PCA. it should return a list containing a matrix object called "W" that contains the component weights 
+#' @param FUN A pointer to a function (i.e. the function name with no brackets) that performs sparse weight based PCA. The function should return a list containing a matrix object called "W" that contains the component weights 
 #' @param ... specify all the arguments the function in FUN needs 
 #' @return The following items in a list \cr
 #' \code{BIC} The BIC given the set of tuning parameters \cr

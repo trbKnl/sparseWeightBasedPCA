@@ -11,7 +11,7 @@ BICforPCAwithSparseWeights(X, ncomp, FUN, ...)
 
 \item{ncomp}{An integer specifying the number of components}
 
-\item{FUN}{A pointer to a function (i.e. the function name with no brackets) that performs sparse weight based PCA. it should return a list containing a matrix object called "W" that contains the component weights}
+\item{FUN}{A pointer to a function (i.e. the function name with no brackets) that performs sparse weight based PCA. The function should return a list containing a matrix object called "W" that contains the component weights}
 
 \item{...}{specify all the arguments the function in FUN needs}
 }
@@ -21,7 +21,7 @@ The following items in a list \cr
 \code{nNonZeroCoef} The number of non-zero coefficients in the model \cr
 }
 \description{
-A function that returns the baysian information criterion (BIC) given a set of tuning parameters and a sparse weight based PCA method
+A function that returns the Bayesian information criterion (BIC) given a set of tuning parameters and a sparse weight based PCA method
 }
 \examples{
  

@@ -18,7 +18,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-# sparseWeightBasedPCA: A package for Regularized weight based Simultaneous Component Analysis (SCA) and Principal Component Analysis (PCA)
+# `sparseWeightBasedPCA`: A package for Regularized weight based Simultaneous Component Analysis (SCA) and Principal Component Analysis (PCA)
 
 ## Theoretical background
 
@@ -98,9 +98,9 @@ Here we present an approach of performing regularized SCA, with ridge and LASSO 
         &\text{subject to } \mathbf{P}_c \mathbf{P}^{T}_c = \mathbf{I}, \text{ and } \lambda_L, \lambda_R \geq 0 \text{ and zero block constraints on } \mathbf{W}_c
     \end{aligned}
 \end{equation}
-In order to get a minimum for (\ref{scads}) we alternate between the estimation of  $\mathbf{W}_c$ and $\mathbf{P}_c$. Given $\mathbf{W}_c$ we can estimate $\mathbf{P}_c$ by using procrustes rotation. Given $\mathbf{P}_c$ we find estimates for $\mathbf{W}_c$ by using a coordinate descent algorithm that works by soft-thresholding weights. For the specifics we refer the reader to (REF: NIEK KATRIJN). This iterative procedure stops when an optimum has been found (.i.e the loss function value is not decreasing anymore beyond pre-specified tolerance level). The optimization problem in (\ref{mmsca}) is non-convex and meaning there are local minima. In order to deal with that multiple random starts can be used with different initializations of $\mathbf{W}$, the start leading to the lowest evaluation of (\ref{mmsca}) is retained. Typically starting the algorithm with the solution of PCA (e.g. the first $Q$ right singular vectors of $\mathbf{X}$) will lead to smallest optimum.
+In order to get a minimum for (\ref{scads}) we alternate between the estimation of  $\mathbf{W}_c$ and $\mathbf{P}_c$. Given $\mathbf{W}_c$ we can estimate $\mathbf{P}_c$ by using procrustes rotation. Given $\mathbf{P}_c$ we find estimates for $\mathbf{W}_c$ by using a coordinate descent algorithm that works by soft-thresholding the weights. For the specifics we refer the reader to (REF: NIEK KATRIJN). This iterative procedure stops when an optimum has been found (.i.e the loss function value is not decreasing anymore beyond pre-specified tolerance level). The optimization problem in (\ref{mmsca}) is non-convex and meaning there are local minima. In order to deal with that multiple random starts can be used with different initializations of $\mathbf{W}$, the start leading to the lowest evaluation of (\ref{mmsca}) is retained. Typically starting the algorithm with the solution of PCA (e.g. the first $Q$ right singular vectors of $\mathbf{X}$) will lead to smallest optimum.
 
-The main advantage of analyzing multi-block data by using this procedure is that it is fast, and scalable to large data sets. This is thanks to the coordinate descent implementation. The inclusion of the blockwise constraints on $\mathbf{W}$ make sure common and distinctive components are found and the LASSO and ridge regularizers are optional and facilitate extra sparsity within the component weights. A disadvantage of the method is that $Q, \lambda_L$, $\lambda_R$ and the common and distinctive structures for $\mathbf{W}$ need to be selected. This has to be done using model selection procedures and can be computationally demanding. I
+The main advantage of analyzing multi-block data by using this procedure is that it is fast, and scalable to large data sets thanks to the coordinate descent implementation. The inclusion of the blockwise constraints on $\mathbf{W}$ make sure common and distinctive components are found and the LASSO and ridge regularizers are optional and facilitate extra sparsity within the component weights. A disadvantage of the method is that  the common and distinctive structures for $\mathbf{W}$ need to be selected. This has to be done using model selection procedures and can be computationally demanding.
 
 This procedure has been implemented in the `scads` function. This function will be discussed in detail in the next section and examples will be given outlining the analysis including model selection.
 
@@ -144,7 +144,7 @@ The main advantage of solving (\ref{mmsca}) is that it can automatically look fo
     \textcolor{purple}{w_{2_{2}1}} &  \textcolor{green}{w_{2_{2}2}} & \textcolor{teal}{w_{2_{2}3}} \\
     \textcolor{purple}{w_{3_{2}1}} &  \textcolor{green}{w_{3_{2}2}} & \textcolor{teal}{w_{2_{2}3}} 
 \end{bmatrix}. \]
-The inclusion the LASSO and ridge regularization are optional and facilitate extra sparsity within the colored segments. The elitist LASSO has a very special use case, the elitist LASSO will include all colored segments and will put weights within each segment to zero. The elitist lasso can be used to force components to be common. It is not advised to use the group LASSO and the elitist LASSO together as they have opposing goals. A disadvantage of using this procedure is that is potentially slow, this because its implemented using a MM-algorithm which tend to be slow in convergence. Also, the hyper parameters of the model need to be selected. 
+The inclusion the LASSO and ridge regularization are optional and facilitate extra sparsity within the colored segments. The elitist LASSO has a very special use case, the elitist LASSO will include all colored segments and will put weights within each segment to zero. The elitist lasso can be used to force components to be common. It is not advised to use the group LASSO and the elitist LASSO together as they have opposing goals. A disadvantage of using this procedure is that is potentially slow, this because its implemented using a MM-algorithm which tend to be slow in convergence. 
 
 This procedure has been implemented in the `mmsca` function. This function will be discussed in detail in the next section and examples will be given outlining the analysis including model selection.
 
@@ -161,24 +161,14 @@ Here we present an approach of solving PCA by applying cardinality constraints t
 In order to get a minimum for (\ref{ccpca}) we need to alternate between the estimation of $\mathbf{W}$ and $\mathbf{P}$. Given $\mathbf{W}$ we can estimate $\mathbf{P}$ by using procruste rotation (REF: Ten_Berge_2005, Zou_2006), $\mathbf{P} = \mathbf{UV}^T$, where $\mathbf{U}$ and $\mathbf{V}$ are the left and right singular vectors of $\mathbf{X}^T\mathbf{XW}$. Given $\mathbf{P}$ we can find estimates for $\mathbf{W}$ given the cardinality constraints using the cardinality constraint regression algorithm for detail see (REF: NIEK KATRIJN). The optimization problem in (\ref{ccpca}) is non-convex and meaning there are local minima. In order to deal with that multiple random starts can be used with different initializations of $\mathbf{W}$, the start leading to the lowest evaluation of (\ref{ccpca}) is retained. Typically starting the algorithm with the solution of PCA (e.g. the first $Q$ right singular vectors of $\mathbf{X}$) will lead to smallest optimum.
 
 The main advantage of solving (\ref{ccpca}) is that this model tries to directly tackle the problem of finding the underlying subset of weights, in contrast to the usage of a penalty that shrinks the weights and also induces sparsity such as the LASSO. This approach can lead to better discovery of the underlying weights compared to LASSO (REF: NIEK KATRIJN). Another advantage is that you directly impose cardinality constraints on $\mathbf{W}$. This gives the user total control over the amount of sparsity. This can be desirable if there is already an idea about the level of sparsity in the final model. 
- A disadvantage of using this procedure is that is potentially slow, this because the CCREG algorithm uses a MM-algorithm which tend to be slow in convergence. Another potential downside could be the absence of regularizers, they tend to shrink the variance of the estimators, leading to more efficient estimators. In noisy situations other procedures might outperform this procedure.
+ A disadvantage of using this procedure is that is potentially slow, this because the CCREG algorithm uses a MM-algorithm which tend to be slow in convergence. Another potential downside could be the absence of regularizers, they tend to shrink the variance of the estimators leading to more efficiency. In noisy situations other procedures might outperform this procedure.
 
 This model has been implemented in the `ccpca` function. This function will be discussed in detail in the next section.
 
+## Overview of available functions in the `sparseWeightBasedPCA` package
 
-```{r}
-set.seed(1)
-X <- matrix(rnorm(100), 20, 5)
-print(X)
-```
+The `sparseWeightBasedPCA` provides functions for the aforementioned models, also model selection procedures are provided in order to tune the hyper parameters. The main functions: `scads, mmsca` and `ccpca` are implemented in `C++` using the packages Rcpp and RcppArmadillo. The model selection procedures are implemented in `R`.  The functions of the package will be discussed after which examples will be given.
 
-
-
-
-
-
-
-
-
+## `scads`
 
 

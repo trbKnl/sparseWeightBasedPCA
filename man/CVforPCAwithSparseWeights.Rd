@@ -9,16 +9,16 @@ CVforPCAwithSparseWeights(X, nrFolds, FUN, ...)
 \arguments{
 \item{X}{A data matrix of class 'matrix'}
 
-\item{nrFolds}{The number of folds that should be used. This should be less than nrow(X).}
+\item{nrFolds}{The number of folds that should be used. This should be less than \code{nrow(X)}.}
 
-\item{FUN}{A pointer to a function (i.e. the function name with no brackets) that performs sparse weight based PCA. it should return a list containing a matrix object called "W" that contains the component weights}
+\item{FUN}{A pointer to a function (i.e. the function name with no brackets) that performs sparse weight based PCA. It should return a list containing a matrix object called \code{W} that contains the component weights}
 
-\item{...}{specify all the arguments the function in FUN needs}
+\item{...}{specify all the arguments the function in \code{FUN} needs}
 }
 \value{
 The following items in a list \cr
-\code{MSPE} The MSPE given the tuning parameters \cr
-\code{MSPEstdError} The standard error of the MSPE \cr
+\code{MSPE} The \code{MSPE} given the tuning parameters \cr
+\code{MSPEstdError} The standard error of the \code{MSPE} \cr
 \code{nNonZeroCoef} The number of non-zero coefficients in the model
 }
 \description{

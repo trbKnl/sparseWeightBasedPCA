@@ -7,13 +7,13 @@
 ISforPCAwithSparseWeights(X, ncomp, FUN, ...)
 }
 \arguments{
-\item{X}{A data matrix of class 'matrix'}
+\item{X}{A data matrix of class \code{matrix}}
 
 \item{ncomp}{An integer specifying the number of components}
 
-\item{FUN}{A pointer to a function (i.e. the function name with no brackets) that performs sparse weight based PCA. it should return a list containing a matrix object called "W" that contains the component weights}
+\item{FUN}{A pointer to a function (i.e. the function name with no brackets) that performs sparse weight based PCA. it should return a list containing a matrix object called \code{W} that contains the component weights}
 
-\item{...}{specify all the arguments the function in FUN needs}
+\item{...}{specify all the arguments the function in \code{FUN} needs}
 }
 \value{
 The following items in a list \cr

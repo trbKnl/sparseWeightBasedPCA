@@ -7,15 +7,15 @@
 sparsify(comdis, sparsity)
 }
 \arguments{
-\item{comdis}{A data matrix of class 'matrix', with a common or distinctive structure. (i.e. zero and ones in prespecified locations)}
+\item{comdis}{A data matrix of class \code{matrix}, with a common or distinctive structure. (i.e. zero and ones in pre specified locations)}
 
-\item{sparsity}{The percentage of non-zero elements in the columns of comdis that should be set to zero. This is a value between zero and 1}
+\item{sparsity}{The percentage of non-zero elements in the columns of \code{comdis} that should be set to zero. This is a value between 0 and 1}
 }
 \value{
-A matrix with a percantage of the non-zero elments in comdis set to zero
+A matrix with a percentage of the non-zero elements in \code{comdis} set to zero
 }
 \description{
-Sparsify: set at random a percentage the non-zero elements of columns of a matrix to zero. This can be used to create a zerp structure for the component weights/loadings from which to simmulate data.
+At random set a percentage the non-zero elements of columns of a matrix to zero. This can be used to create a zero structure for the component weights/loadings from which to simulate data.
 }
 \examples{
 

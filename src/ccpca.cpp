@@ -21,22 +21,22 @@ void updatewCpp(arma::mat& W, const arma::mat& P, const int& Q, const arma::mat&
 
 }
 
+//' ccpca: Sparse pca with cardinality constraints on the component weights
+//'
 //' This function performs PCA with cardinality constraints on the component weights.
-//' Note: This function is fully written in C++, therefore no default parameter arguments are given, please check the example below for sensible default values.
-//'
-//'
+//' 
 //' @param X A data matrix of class 'matrix'
 //' @param ncomp The number of components to estimate (an integer)
-//' @param nzeros A vector of length ncomp containing the number of desired zeros in the columns of the component weight matrix W 
+//' @param nzeros A vector of length ncomp containing the number of desired zeros in the columns of the component weight matrix \code{W}
 //' @param itr The maximum number of iterations (an integer)
-//' @param Wstart A matrix of ncomp columns and nrow(X) rows with starting values for the component weight matrix W, if Wstart only contains zeros, a warm start is used: the first ncomp right singular vectors of X
-//' @param nStarts The number of random starts the analysis should perform. The first start will be performed with the values given by Wstart. The consecutive starts will be Wstart plus a matrix with random uniform values times the current start number (the first start has index zero). The default value is 1.
-//' @param tol The convergence is determined by comparing the loss function value after each iteration, if the difference is smaller than tol, the analysis is converged. The default value is 10e-8
-//' @param printLoss A boolean: TRUE will print the lossfunction value each 10th iteration.
+//' @param Wstart A matrix of \code{ncomp} columns and \code{nrow(X)} rows with starting values for the component weight matrix \code{W}, if \code{Wstart} only contains zeros, a warm start is used: the first \code{ncomp} right singular vectors of \code{X}
+//' @param nStarts The number of random starts the analysis should perform. The first start will be performed with the values given by \code{Wstart}. The consecutive starts will be \code{Wstart} plus a matrix with random uniform values times the current start number (the first start has index zero). The default value is 1.
+//' @param tol The convergence is determined by comparing the loss function value after each iteration, if the difference is smaller than \code{tol} the analysis is converged. The default value is \code{10e-8}
+//' @param printLoss A boolean: \code{TRUE} will print the loss function value each 10th iteration.
 //' @return A list containing: \cr
 //' \code{W} A matrix containing the component weights \cr
 //' \code{P} A matrix containing the loadings \cr
-//' \code{loss} A numeric variable ccontaining the minumn loss function value of all the nStarts starts \cr
+//' \code{loss} A numeric variable containing the minimum loss function value of all the \code{nStarts} starts \cr
 //' \code{converged} A boolean containing \code{TRUE} if converged \code{FALSE} if not converged.
 //' @export
 //' @examples

@@ -9,7 +9,7 @@ makeDat(n, comdis, variances)
 \arguments{
 \item{n}{The number of objects the data should have}
 
-\item{comdis}{A matric specifying the zero structure of \eqn{W}, the data will have Q = ncol(comdis) "important components" and J = nrow(comdis) variables}
+\item{comdis}{A \code{matrix} specifying the zero structure of \eqn{W}, the data will have Q = \code{ncol(comdis)} "important components" and J = \code{nrow(comdis)} variables}
 
 \item{variances}{specifying the variances of the J components these are the J eigenvalues of \eqn{X^T X}}
 
@@ -17,10 +17,10 @@ makeDat(n, comdis, variances)
 }
 \value{
 A list with the following items: \cr
-\code{X} A data matrix generated from MASS::mvrnorm() with a zero mean structure and Sigma = P \%*\% diag(variances) \%*\% t(P), emprical is set \code{FALSE} \cr
-\code{P} A matrix of dimension J x J, with the loadings/weights the first Q columns have the sparsity structure specified in comdis, the other Q-J columns are non-sparse. \cr
-\code{Sigma} The covariance matrix that is used to generate the data from Sigma = P \%*\% diag(variances) \%*\% t(P) \cr
-In case of faillure the function returns \code{NA}. The function can fail if the comdis structure specified in P is not possible, i.e. linear dependency
+\code{X} A data matrix generated from MASS::mvrnorm() with a zero mean structure and Sigma = P \%*\% diag(variances) \%*\% t(P), empirical is set \code{FALSE} \cr
+\code{P} A matrix of dimension J x J, with the loadings/weights the first Q columns have the sparsity structure specified in \code{comdis}, the other Q-J columns are non-sparse. \cr
+\code{Sigma} The covariance matrix that is used to generate the data from Sigma \code{= P \%*\% diag(variances) \%*\% t(P)} \cr
+In case of failure the function returns \code{NA}. The function can fail if the \code{comdis} structure specified in P is not possible, i.e. linear dependency
 }
 \description{
 A function that generates a realistic dataset based on a sparse PCA model \eqn{X = XWP^T}, with a sparse \eqn{W} and with W = P and \eqn{W^T W = I}
