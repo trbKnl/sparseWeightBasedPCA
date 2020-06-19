@@ -82,6 +82,8 @@ The `sparseWeightBasedPCA` package will provide functions that perform PCA and S
 2. `mmsca` Regularized SCA with sparse component weights using the group LASSO
 3. `ccpca` PCA with sparse component weights using cardinality constraints
 
+WRITE HERE WHAT OTHER PACKAGES DO
+
 ## Models of the `sparseWeightBasedPCA` package
 
 ### Regularized SCA with sparse component weights using constraints 
