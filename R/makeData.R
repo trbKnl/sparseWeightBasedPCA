@@ -116,7 +116,7 @@ sparsify <- function(comdis, sparsity){
 #'
 #' @param n The number of objects the data should have 
 #' @param ncomp The number of components that are of interest
-#' @param comdis A \code{matrix} specifying the zero structure of \eqn{W}, the data will have Q = \code{ncol(comdis)} "important components" and J = \code{nrow(comdis)} variables
+#' @param comdis A \code{matrix} specifying the zero structure of \eqn{W}, the data will have ncomp = \code{ncol(comdis)} "important components" and J = \code{nrow(comdis)} variables
 #' @param variances specifying the variances of the J components these are the J eigenvalues of \eqn{X^T X}  
 #' @return A list with the following items: \cr
 #' \code{X} A data matrix generated from MASS::mvrnorm() with a zero mean structure and Sigma = P \%*\% diag(variances) \%*\% t(P), empirical is set \code{FALSE} \cr

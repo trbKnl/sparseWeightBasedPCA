@@ -25,47 +25,47 @@ mmscaHyperCubeSelection(
 )
 }
 \arguments{
-\item{X}{A data matrix of class 'matrix'}
+\item{X}{A data matrix of class \code{matrix}}
 
-\item{ridgeSeq}{A range of values for the ridge penalty that need to be examined. Specify a zero, if the tuning parameter is not wanted.}
+\item{ridgeSeq}{A range of values for the ridge penalty that need to be examined. Specify a zero if the tuning parameter is not wanted.}
 
-\item{lassoSeq}{A range of values for the lasso penalty that need to be examined. Specify a zero, if the tuning parameter is not wanted.}
+\item{lassoSeq}{A range of values for the lasso penalty that need to be examined. Specify a zero if the tuning parameter is not wanted.}
 
-\item{grouplassoSeq}{A range of values for the group lasso penalty that need to be examined. Specify a zero, if the tuning parameter is not wanted.}
+\item{grouplassoSeq}{A range of values for the group lasso penalty that need to be examined. Specify a zero if the tuning parameter is not wanted.}
 
-\item{elitistlassoSeq}{A range of values for the elitist lasso penalty that need to be examined. Specify a zero, if the tuning parameter is not wanted.}
+\item{elitistlassoSeq}{A range of values for the elitist lasso penalty that need to be examined. Specify a zero if the tuning parameter is not wanted.}
 
-\item{stepsize}{The sequences of ridgeSeq, lassoSeq, grouplassoSeq, and elitistlassoSeq are constructed by seq(min(seq), max(seq), by = stepsize). So stepsize determines how fine the grid is.}
+\item{stepsize}{The sequences of ridgeSeq, lassoSeq, grouplassoSeq, and elitistlassoSeq are constructed by \code{seq(min(seq), max(seq), by = stepsize)}. So \code{stepsize} determines how fine the grid is.}
 
-\item{logscale}{determines whether the sequences are on the log-scale or not. By default it is set to FALSE.}
+\item{logscale}{determines whether the sequences are on the log-scale or not. By default it is set to \code{FALSE}.}
 
-\item{groups}{A vector specifiying which columns of X belong to what block. Example: c(10, 100, 1000). The first 10 variables belong to the first block, the 100 variables after that belong to the second block etc.}
+\item{groups}{A vector specifying which columns of X belong to what block. Example: \code{c(10, 100, 1000)}. The first 10 variables belong to the first block, the 100 variables after that belong to the second block etc.}
 
-\item{nStart}{The number of random starts the analysis should perform. The first start will be a warm start. You can not give custom starting values.}
+\item{nStart}{The number of random starts the analysis should perform. The first start will be a warm start, W will be started with the first Q right singular vectors of X. You can not give custom starting values.}
 
-\item{itr}{The maximum number of iterations of mmsca() (a positive integer). Default is set to 10e5.}
+\item{itr}{The maximum number of iterations of \code{mmsca()} (a positive integer). Default is set to \code{10e5}.}
 
-\item{printProgress}{A boolean with default TRUE. If set to true, the progess of mmscaHyperCubeSelection() will be printed to the screen.}
+\item{printProgress}{A boolean with default TRUE. If set to \code{TRUE}, the proges of the procedure will be printed to the screen.}
 
-\item{coorDes}{A boolean with the default FALSE. If coorDes is FALSE the estimation of the majorizing function to estimate the component weights W conditional on the loadings P will be found using matrix inverses which can be slow. If set to true the marjozing function will be optimized (or partially optimized) using coordinate descent, in many cases coordinate descent will be faster}
+\item{coorDes}{A boolean with the default \code{FALSE}. If coorDes is \code{FALSE} the estimation of the majorizing function to estimate the component weights W conditional on the loadings P will be found using matrix inverses which can be slow. If set to true the marjozing function will be optimized (or partially optimized) using coordinate descent, in some cases coordinate descent will be faster.}
 
-\item{coorDesItr}{An integer specifying the maximum number of iterations for the coordinate descent algorithm, the default is set to 1. You do not have to run this algorithm until convergence before alternating back the the estimation of the loadings. The tolerance for this algorithm is hardcoded and set to 10^-8.}
+\item{coorDesItr}{An integer specifying the maximum number of iterations for the coordinate descent algorithm, the default is set to 1. You do not have to run this algorithm until convergence before alternating back to the estimation of the loadings. The tolerance for this algorithm is hardcoded and set to \code{10^-8}.}
 
-\item{tol}{A numeric value specifying the tolerance of mmsca(), it determine when the algorithm is converged (|current loss - previous loss| < tol), by default it is set to 10e-8. Which might be too small or too large depending on the scaling of the data.}
+\item{tol}{A numeric value specifying the tolerance of mmsca(), it determine when the algorithm is converged (|current loss - previous loss| < tol), by default it is set to \code{10e-8}. Which might be too small or too large depending on the scaling of the data.}
 
-\item{method}{A string indicating which model selection method should be used. "BIC" enables the bayesian information criterion, "IS" enables the index of sparseness. "CV" enables cross-validation (C) with the EigenVector method, "CV1stdError" enables CV with the one standard error rule, this will pick the combination of tuning parameters that leads to the most sparse model, still within one standard error of the best model, if "CV" or "CV1stdError" is used, the number of folds nrFolds needs to be chosen. The number of folds should be an integer less than nrow(X). The data are then split in equal sized chunks if order of appearance. Note that if you choose "C1stdError", the number of folds influeces the standard error, choose it too small and standard error will be large, consequently all models fall within one standard error of the best model.}
+\item{method}{A string indicating which model selection method should be used. "BIC" enables the Bayesian information criterion, "IS" enables the index of sparseness. "CV" enables cross-validation (CV) with the EigenVector method, "CV1stdError" enables CV with the one standard error rule, this will pick the combination of tuning parameters that leads to the most sparse model, still within one standard error of the best model, if "CV" or "CV1stdError" is used, the number of folds \code{nrFolds} needs to be chosen. The number of folds should be an integer less than \code{nrow(X)}. The data are then split in equal sized chunks if order of appearance. Note that if you choose "C1stdError", the number of folds influences the standard error, choose it too small and standard error will be large, consequently all models fall within one standard error of the best model.}
 
-\item{nrFold}{An integer that specify the number of folds that Cross-validation should use if tuningmethod == "CV", the number of folds needs to be lower then nrow(X).}
+\item{nrFold}{An integer that specify the number of folds that Cross-validation should use if tuningmethod == "CV", the number of folds needs to be lower then \code{nrow(X)}.}
 }
 \value{
 A list containing: \cr
-\code{ridge} A vector with ncomp elements all equal to the chosen ridge value \cr
-\code{lasso} A vector with ncomp elements all equal to the chosen lasso value \cr
-\code{grouplasso} A vector with ncomp elements all equal to the chosen grouplasso value \cr
-\code{elitistlasso} A vector with ncomp elements all equal to the chosen ridge value \cr
+\code{ridge} A vector with \code{ncomp} elements all equal to the chosen ridge value \cr
+\code{lasso} A vector with \code{ncomp} elements all equal to the chosen lasso value \cr
+\code{grouplasso} A vector with \code{ncomp} elements all equal to the chosen grouplasso value \cr
+\code{elitistlasso} A vector with \code{ncomp} elements all equal to the chosen ridge value \cr
 }
 \description{
-A function that performs model selection for the regularizers of mmsca(). This function tunes a grid of the tuning parameters given the sequence. It picks out the best combinatio, and zooms in on that combination, by making a new smaller grid around the previous best combination. This process continues until the average range of the sequences is less than 0.05. The sequences are determined by taking the minium value to be: best value - range, and maximum value by best value + range, and a specified stepsize. The grid is constructed by taking all combinations of the sequences. The size of the grid shrinks by half each time a new combination is found.
+A function that performs model selection for the regularizers of mmsca(). This function tunes a grid of the tuning parameters given their sequences. It picks out the best combination, and zooms in on that combination, by making a new smaller grid around the previous best combination. This process continues until the average range of the sequences is less than 0.05. The sequences are determined by taking the minium value to be: best value - range, and maximum value by: best value + range, and a pre-specified step size. The grid is constructed by taking all combinations of the sequences. The size of the grid shrinks by half each time a new combination is found.
 }
 \examples{
  

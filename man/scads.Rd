@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{scads}
 \alias{scads}
-\title{This function performs sparse PCA with constraints on the component weights and/or ridge and lasso regularization.}
+\title{scads: Sparse SCA/PCA with constraints on the component weights, and/or ridge and lasso regularization}
 \usage{
 scads(
   X,
@@ -18,35 +18,35 @@ scads(
 )
 }
 \arguments{
-\item{X}{A data matrix of class 'matrix'}
+\item{X}{A data matrix of class \code{matrix}}
 
 \item{ncomp}{The number of components to estimate (an integer)}
 
-\item{ridge}{A numeric value containing the ridge parameter for the component weight matrix W}
+\item{ridge}{A numeric value containing the ridge parameter for ridge regularization on the component weight matrix W}
 
-\item{lasso}{A vector containing a ridge parameter for each column of W seperately, to set the same lasso penalty for the component weights W, specify: lasso = rep(value, ncomp)}
+\item{lasso}{A vector containing a ridge parameter for each column of W separately, to set the same lasso penalty for the component weights W, specify: lasso = \code{rep(value, ncomp)}}
 
-\item{constraints}{A matrix of the same dimensions as the component weights matrix W (ncol(X) x ncomp). A zero entry corresponds in constraints corresponds to an element in the same location in W that needs to be constraint to zero. A non-zero entry corresponds to an element in the same location in W that needs to be estimated.}
+\item{constraints}{A matrix of the same dimensions as the component weights matrix W (\code{ncol(X)} x \code{ncomp}). A zero entry corresponds in constraints corresponds to an element in the same location in W that needs to be constraint to zero. A non-zero entry corresponds to an element in the same location in W that needs to be estimated.}
 
 \item{itr}{The maximum number of iterations (an integer)}
 
-\item{Wstart}{A matrix of ncomp columns and nrow(X) rows with starting values for the component weight matrix W, if Wstart only contains zeros, a warm start is used: the first ncomp right singular vectors of X}
+\item{Wstart}{A matrix of \code{ncomp} columns and \code{nrow(X)} rows with starting values for the component weight matrix W, if \code{Wstart} only contains zeros, a warm start is used: the first \code{ncomp} right singular vectors of X}
 
-\item{tol}{The convergence is determined by comparing the loss function value after each iteration, if the difference is smaller than tol, the analysis is converged. The default value is 10e-8.}
+\item{tol}{The convergence is determined by comparing the loss function value after each iteration, if the difference is smaller than tol, the analysis is converged. The default value is \code{10e-8}.}
 
-\item{nStarts}{The number of random starts the analysis should perform. The first start will be performed with the values given by Wstart. The consecutive starts will be Wstart plus a matrix with random uniform values times the current start number (the first start has index zero).}
+\item{nStarts}{The number of random starts the analysis should perform. The first start will be performed with the values given by \code{Wstart}. The consecutive starts will be \code{Wstart} plus a matrix with random uniform values times the current start number (the first start has index zero).}
 
-\item{printLoss}{A boolean: TRUE will print the lossfunction value each 10th iteration.}
+\item{printLoss}{A boolean: \code{TRUE} will print the lossfunction value each 10th iteration.}
 }
 \value{
 A list containing: \cr
 \code{W} A matrix containing the component weights \cr
 \code{P} A matrix containing the loadings \cr
-\code{loss} A numeric variable ccontaining the minumn loss function value of all the nStarts starts \cr
+\code{loss} A numeric variable containing the minimum loss function value of all the \code{nStarts} starts \cr
 \code{converged} A boolean containing \code{TRUE} if converged \code{FALSE} if not converged.
 }
 \description{
-This function performs sparse PCA with constraints on the component weights and/or ridge and lasso regularization.
+This function performs sparse SCA/PCA with constraints on the component weights and/or ridge and lasso regularization.
 }
 \examples{
 
@@ -111,5 +111,5 @@ head(results$W) #inspect results of the estimation
 head(dat$P[, 1:ncomp]) #inspect data generating model
 }
 \references{
-De Schipper, N. C., & Van Deun, K. (2018). Revealing the Joint Mechanisms in Traditional Data Linked With Big 					Data. Zeitschrift Für Psychologie, 226(4), 212–231. doi:10.1027/2151-2604/a000341
+De Schipper, N. C., & Van Deun, K. (2018). Revealing the Joint Mechanisms in Traditional Data Linked With Big Data. Zeitschrift Für Psychologie, 226(4), 212–231. doi:10.1027/2151-2604/a000341
 }

@@ -56,28 +56,29 @@ ccpca <- function(X, ncomp, nzeros, itr, Wstart, nStarts = 1L, tol = 10e-8, prin
     .Call(`_sparseWeightBasedPCA_ccpca`, X, ncomp, nzeros, itr, Wstart, nStarts, tol, printLoss)
 }
 
-#' This function performs PCA/SCA with and/or: ridge, lasso, grouplasso, elitistlasso regularization. This function allows for constraining certain weights to zero.
-#' 
+#' mmsca: Sparse SCA/PCA with and/or: ridge, lasso, group lasso, elitist lasso regularization
+#'
+#' This function performs PCA/SCA with and/or: ridge, lasso, group lasso, elitist lasso regularization. This function allows for constraining certain weights to zero.
 #'  
-#' @param X A data matrix of class 'matrix'
+#' @param X A data matrix of class \code{matrix}
 #' @param ncomp The number of components to estimate (an integer)
-#' @param ridge A vector containing a ridge parameter for each column of W seperately, to set the same ridge penalty for the component weights W, specify: ridge = rep(value, ncomp), value is a non-negative double
-#' @param lasso A vector containing a ridge parameter for each column of W seperately, to set the same lasso penalty for the component weights W, specify: lasso = rep(value, ncomp), value is a non-negative double
-#' @param grouplasso A vector containing a grouplasso parameter for each column of W seperately, to set the same grouplasso penalty for the component weights W, specify: grouplasso = rep(value, ncomp), value is a non-negative double
-#' @param elitistlasso A vector containing a elitistlasso parameter for each column of W seperately, to set the same elitistlasso penalty for the component weights W, specify: elitistlasso = rep(value, ncomp), value is a non-negative double
-#' @param groups A vector specifiying which columns of X belong to what block. Example: c(10, 100, 1000). The first 10 variables belong to the first block, the 100 variables after that belong to the second block etc.
-#' @param constraints A matrix of the same dimensions as the component weights matrix W (ncol(X) x ncomp). A zero entry corresponds in constraints corresponds to an element in the same location in W that needs to be constraint to zero. A non-zero entry corresponds to an element in the same location in W that needs to be estimated.
+#' @param ridge A vector containing a ridge parameter for each column of W separately, to set the same ridge penalty for the component weights W, specify: ridge = \code{rep(value, ncomp)}, value is a non-negative double
+#' @param lasso A vector containing a ridge parameter for each column of W separately, to set the same lasso penalty for the component weights W, specify: lasso = \code{rep(value, ncomp)}, value is a non-negative double
+#' @param grouplasso A vector containing a grouplasso parameter for each column of W separately, to set the same grouplasso penalty for the component weights W, specify: grouplasso = \code{rep(value, ncomp)}, value is a non-negative double
+#' @param elitistlasso A vector containing a elitistlasso parameter for each column of W separately, to set the same elitistlasso penalty for the component weights W, specify: elitistlasso = \code{rep(value, ncomp)}, value is a non-negative double
+#' @param groups A vector specifying which columns of \code{X} belong to what block. Example: \code{c(10, 100, 1000)}. The first 10 variables belong to the first block, the 100 variables after that belong to the second block etc.
+#' @param constraints A matrix of the same dimensions as the component weights matrix W (\code{ncol(X)} x \code{ncomp}). A zero entry corresponds in constraints corresponds to an element in the same location in W that needs to be constraint to zero. A non-zero entry corresponds to an element in the same location in W that needs to be estimated.
 #' @param itr The maximum number of iterations (a positive integer)
-#' @param Wstart A matrix of ncomp columns and nrow(X) rows with starting values for the component weight matrix W, if Wstart only contains zeros, a warm start is used: the first ncomp right singular vectors of X
-#' @param tol The convergence is determined by comparing the loss function value after each iteration, if the difference is smaller than tol, the analysis is converged. Default value is 10e-8
-#' @param nStarts The number of random starts the analysis should perform. The first start will be performed with the values given by Wstart. The consecutive starts will be Wstart plus a matrix with random uniform values times the current start number (the first start has index zero).
-#' @param printLoss A boolean: TRUE will print the lossfunction value each 1000 iteration.
-#' @param coorDes A boolean with the default FALSE. If coorDes is FALSE the estimation of the majorizing function to estimate the component weights W conditional on the loadings P will be found using matrix inverses which can be slow. If set to true the marjozing function will be optimized (or partially optimized) using coordinate descent, in many cases coordinate descent will be faster
-#' @param coorDesItr An integer specifying the maximum number of iterations for the coordinate descent algorithm, the default is set to 1. You do not have to run this algorithm until convergence before alternating back the the estimation of the loadings. The tolerance for this algorithm is hardcoded and set to 10^-8. 
+#' @param Wstart A matrix of \code{ncomp} columns and \code{nrow(X)} rows with starting values for the component weight matrix W, if \code{Wstart} only contains zeros, a warm start is used: the first \code{ncomp} right singular vectors of \code{X}
+#' @param tol The convergence is determined by comparing the loss function value after each iteration, if the difference is smaller than \code{tol}, the analysis is converged. Default value is \code{10e-8}
+#' @param nStarts The number of random starts the analysis should perform. The first start will be performed with the values given by \code{Wstart}. The consecutive starts will be \code{Wstart} plus a matrix with random uniform values times the current start number (the first start has index zero).
+#' @param printLoss A boolean: \code{TRUE} will print the lossfunction value each 1000 iteration.
+#' @param coorDes A boolean with the default \code{FALSE}. If coorDes is \code{FALSE} the estimation of the majorizing function to estimate the component weights W conditional on the loadings P will be found using matrix inverses which can be slow. If set to true the marjozing function will be optimized (or partially optimized) using coordinate descent, in many cases coordinate descent will be faster
+#' @param coorDesItr An integer specifying the maximum number of iterations for the coordinate descent algorithm, the default is set to 1. You do not have to run this algorithm until convergence before alternating back to the estimation of the loadings. The tolerance for this algorithm is hardcoded and set to \code{10^-8}. 
 #' @return A list containing: \cr
 #' \code{W} A matrix containing the component weights \cr
 #' \code{P} A matrix containing the loadings \cr
-#' \code{loss} A numeric variable ccontaining the minumn loss function value of all the nStarts starts \cr
+#' \code{loss} A numeric variable containing the minimum loss function value of all the \code{nStarts} starts \cr
 #' \code{converged} A boolean containing \code{TRUE} if converged \code{FALSE} if not converged.
 #' @export
 #' @examples
@@ -132,22 +133,24 @@ mmsca <- function(X, ncomp, ridge, lasso, grouplasso, elitistlasso, groups, cons
     .Call(`_sparseWeightBasedPCA_mmsca`, X, ncomp, ridge, lasso, grouplasso, elitistlasso, groups, constraints, itr, Wstart, tol, nStarts, printLoss, coorDes, coorDesItr)
 }
 
-#' This function performs sparse PCA with constraints on the component weights and/or ridge and lasso regularization.
+#' scads: Sparse SCA/PCA with constraints on the component weights, and/or ridge and lasso regularization
+#'
+#' This function performs sparse SCA/PCA with constraints on the component weights and/or ridge and lasso regularization.
 #' 
-#' @param X A data matrix of class 'matrix'
+#' @param X A data matrix of class \code{matrix}
 #' @param ncomp The number of components to estimate (an integer)
-#' @param ridge A numeric value containing the ridge parameter for the component weight matrix W
-#' @param lasso A vector containing a ridge parameter for each column of W seperately, to set the same lasso penalty for the component weights W, specify: lasso = rep(value, ncomp)
-#' @param constraints A matrix of the same dimensions as the component weights matrix W (ncol(X) x ncomp). A zero entry corresponds in constraints corresponds to an element in the same location in W that needs to be constraint to zero. A non-zero entry corresponds to an element in the same location in W that needs to be estimated.
+#' @param ridge A numeric value containing the ridge parameter for ridge regularization on the component weight matrix W
+#' @param lasso A vector containing a ridge parameter for each column of W separately, to set the same lasso penalty for the component weights W, specify: lasso = \code{rep(value, ncomp)}
+#' @param constraints A matrix of the same dimensions as the component weights matrix W (\code{ncol(X)} x \code{ncomp}). A zero entry corresponds in constraints corresponds to an element in the same location in W that needs to be constraint to zero. A non-zero entry corresponds to an element in the same location in W that needs to be estimated.
 #' @param itr The maximum number of iterations (an integer)
-#' @param Wstart A matrix of ncomp columns and nrow(X) rows with starting values for the component weight matrix W, if Wstart only contains zeros, a warm start is used: the first ncomp right singular vectors of X
-#' @param tol The convergence is determined by comparing the loss function value after each iteration, if the difference is smaller than tol, the analysis is converged. The default value is 10e-8.
-#' @param nStarts The number of random starts the analysis should perform. The first start will be performed with the values given by Wstart. The consecutive starts will be Wstart plus a matrix with random uniform values times the current start number (the first start has index zero).
-#' @param printLoss A boolean: TRUE will print the lossfunction value each 10th iteration.
+#' @param Wstart A matrix of \code{ncomp} columns and \code{nrow(X)} rows with starting values for the component weight matrix W, if \code{Wstart} only contains zeros, a warm start is used: the first \code{ncomp} right singular vectors of X
+#' @param tol The convergence is determined by comparing the loss function value after each iteration, if the difference is smaller than tol, the analysis is converged. The default value is \code{10e-8}.
+#' @param nStarts The number of random starts the analysis should perform. The first start will be performed with the values given by \code{Wstart}. The consecutive starts will be \code{Wstart} plus a matrix with random uniform values times the current start number (the first start has index zero).
+#' @param printLoss A boolean: \code{TRUE} will print the lossfunction value each 10th iteration.
 #' @return A list containing: \cr
 #' \code{W} A matrix containing the component weights \cr
 #' \code{P} A matrix containing the loadings \cr
-#' \code{loss} A numeric variable ccontaining the minumn loss function value of all the nStarts starts \cr
+#' \code{loss} A numeric variable containing the minimum loss function value of all the \code{nStarts} starts \cr
 #' \code{converged} A boolean containing \code{TRUE} if converged \code{FALSE} if not converged. 
 #' @export
 #' @examples
@@ -212,7 +215,7 @@ mmsca <- function(X, ncomp, ridge, lasso, grouplasso, elitistlasso, groups, cons
 #' head(results$W) #inspect results of the estimation
 #' head(dat$P[, 1:ncomp]) #inspect data generating model
 #' @references
-#' De Schipper, N. C., & Van Deun, K. (2018). Revealing the Joint Mechanisms in Traditional Data Linked With Big 					Data. Zeitschrift Für Psychologie, 226(4), 212–231. doi:10.1027/2151-2604/a000341
+#' De Schipper, N. C., & Van Deun, K. (2018). Revealing the Joint Mechanisms in Traditional Data Linked With Big Data. Zeitschrift Für Psychologie, 226(4), 212–231. doi:10.1027/2151-2604/a000341
 scads <- function(X, ncomp, ridge, lasso, constraints, itr, Wstart, tol = 10e-8, nStarts = 1L, printLoss = TRUE) {
     .Call(`_sparseWeightBasedPCA_scads`, X, ncomp, ridge, lasso, constraints, itr, Wstart, tol, nStarts, printLoss)
 }

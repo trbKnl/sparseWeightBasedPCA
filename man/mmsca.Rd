@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{mmsca}
 \alias{mmsca}
-\title{This function performs PCA/SCA with and/or: ridge, lasso, grouplasso, elitistlasso regularization. This function allows for constraining certain weights to zero.}
+\title{mmsca: Sparse SCA/PCA with and/or: ridge, lasso, group lasso, elitist lasso regularization}
 \usage{
 mmsca(
   X,
@@ -23,45 +23,45 @@ mmsca(
 )
 }
 \arguments{
-\item{X}{A data matrix of class 'matrix'}
+\item{X}{A data matrix of class \code{matrix}}
 
 \item{ncomp}{The number of components to estimate (an integer)}
 
-\item{ridge}{A vector containing a ridge parameter for each column of W seperately, to set the same ridge penalty for the component weights W, specify: ridge = rep(value, ncomp), value is a non-negative double}
+\item{ridge}{A vector containing a ridge parameter for each column of W separately, to set the same ridge penalty for the component weights W, specify: ridge = \code{rep(value, ncomp)}, value is a non-negative double}
 
-\item{lasso}{A vector containing a ridge parameter for each column of W seperately, to set the same lasso penalty for the component weights W, specify: lasso = rep(value, ncomp), value is a non-negative double}
+\item{lasso}{A vector containing a ridge parameter for each column of W separately, to set the same lasso penalty for the component weights W, specify: lasso = \code{rep(value, ncomp)}, value is a non-negative double}
 
-\item{grouplasso}{A vector containing a grouplasso parameter for each column of W seperately, to set the same grouplasso penalty for the component weights W, specify: grouplasso = rep(value, ncomp), value is a non-negative double}
+\item{grouplasso}{A vector containing a grouplasso parameter for each column of W separately, to set the same grouplasso penalty for the component weights W, specify: grouplasso = \code{rep(value, ncomp)}, value is a non-negative double}
 
-\item{elitistlasso}{A vector containing a elitistlasso parameter for each column of W seperately, to set the same elitistlasso penalty for the component weights W, specify: elitistlasso = rep(value, ncomp), value is a non-negative double}
+\item{elitistlasso}{A vector containing a elitistlasso parameter for each column of W separately, to set the same elitistlasso penalty for the component weights W, specify: elitistlasso = \code{rep(value, ncomp)}, value is a non-negative double}
 
-\item{groups}{A vector specifiying which columns of X belong to what block. Example: c(10, 100, 1000). The first 10 variables belong to the first block, the 100 variables after that belong to the second block etc.}
+\item{groups}{A vector specifying which columns of \code{X} belong to what block. Example: \code{c(10, 100, 1000)}. The first 10 variables belong to the first block, the 100 variables after that belong to the second block etc.}
 
-\item{constraints}{A matrix of the same dimensions as the component weights matrix W (ncol(X) x ncomp). A zero entry corresponds in constraints corresponds to an element in the same location in W that needs to be constraint to zero. A non-zero entry corresponds to an element in the same location in W that needs to be estimated.}
+\item{constraints}{A matrix of the same dimensions as the component weights matrix W (\code{ncol(X)} x \code{ncomp}). A zero entry corresponds in constraints corresponds to an element in the same location in W that needs to be constraint to zero. A non-zero entry corresponds to an element in the same location in W that needs to be estimated.}
 
 \item{itr}{The maximum number of iterations (a positive integer)}
 
-\item{Wstart}{A matrix of ncomp columns and nrow(X) rows with starting values for the component weight matrix W, if Wstart only contains zeros, a warm start is used: the first ncomp right singular vectors of X}
+\item{Wstart}{A matrix of \code{ncomp} columns and \code{nrow(X)} rows with starting values for the component weight matrix W, if \code{Wstart} only contains zeros, a warm start is used: the first \code{ncomp} right singular vectors of \code{X}}
 
-\item{tol}{The convergence is determined by comparing the loss function value after each iteration, if the difference is smaller than tol, the analysis is converged. Default value is 10e-8}
+\item{tol}{The convergence is determined by comparing the loss function value after each iteration, if the difference is smaller than \code{tol}, the analysis is converged. Default value is \code{10e-8}}
 
-\item{nStarts}{The number of random starts the analysis should perform. The first start will be performed with the values given by Wstart. The consecutive starts will be Wstart plus a matrix with random uniform values times the current start number (the first start has index zero).}
+\item{nStarts}{The number of random starts the analysis should perform. The first start will be performed with the values given by \code{Wstart}. The consecutive starts will be \code{Wstart} plus a matrix with random uniform values times the current start number (the first start has index zero).}
 
-\item{printLoss}{A boolean: TRUE will print the lossfunction value each 1000 iteration.}
+\item{printLoss}{A boolean: \code{TRUE} will print the lossfunction value each 1000 iteration.}
 
-\item{coorDes}{A boolean with the default FALSE. If coorDes is FALSE the estimation of the majorizing function to estimate the component weights W conditional on the loadings P will be found using matrix inverses which can be slow. If set to true the marjozing function will be optimized (or partially optimized) using coordinate descent, in many cases coordinate descent will be faster}
+\item{coorDes}{A boolean with the default \code{FALSE}. If coorDes is \code{FALSE} the estimation of the majorizing function to estimate the component weights W conditional on the loadings P will be found using matrix inverses which can be slow. If set to true the marjozing function will be optimized (or partially optimized) using coordinate descent, in many cases coordinate descent will be faster}
 
-\item{coorDesItr}{An integer specifying the maximum number of iterations for the coordinate descent algorithm, the default is set to 1. You do not have to run this algorithm until convergence before alternating back the the estimation of the loadings. The tolerance for this algorithm is hardcoded and set to 10^-8.}
+\item{coorDesItr}{An integer specifying the maximum number of iterations for the coordinate descent algorithm, the default is set to 1. You do not have to run this algorithm until convergence before alternating back to the estimation of the loadings. The tolerance for this algorithm is hardcoded and set to \code{10^-8}.}
 }
 \value{
 A list containing: \cr
 \code{W} A matrix containing the component weights \cr
 \code{P} A matrix containing the loadings \cr
-\code{loss} A numeric variable ccontaining the minumn loss function value of all the nStarts starts \cr
+\code{loss} A numeric variable containing the minimum loss function value of all the \code{nStarts} starts \cr
 \code{converged} A boolean containing \code{TRUE} if converged \code{FALSE} if not converged.
 }
 \description{
-This function performs PCA/SCA with and/or: ridge, lasso, grouplasso, elitistlasso regularization. This function allows for constraining certain weights to zero.
+This function performs PCA/SCA with and/or: ridge, lasso, group lasso, elitist lasso regularization. This function allows for constraining certain weights to zero.
 }
 \examples{
 

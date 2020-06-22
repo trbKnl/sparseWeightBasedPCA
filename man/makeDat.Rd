@@ -9,7 +9,7 @@ makeDat(n, comdis, variances)
 \arguments{
 \item{n}{The number of objects the data should have}
 
-\item{comdis}{A \code{matrix} specifying the zero structure of \eqn{W}, the data will have Q = \code{ncol(comdis)} "important components" and J = \code{nrow(comdis)} variables}
+\item{comdis}{A \code{matrix} specifying the zero structure of \eqn{W}, the data will have ncomp = \code{ncol(comdis)} "important components" and J = \code{nrow(comdis)} variables}
 
 \item{variances}{specifying the variances of the J components these are the J eigenvalues of \eqn{X^T X}}
 

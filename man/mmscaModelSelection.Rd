@@ -22,42 +22,41 @@ mmscaModelSelection(
 )
 }
 \arguments{
-\item{X}{A data matrix of class 'matrix'}
+\item{X}{A data matrix of class \code{matrix}}
 
-\item{ridgeSeq}{A range of values for the ridge penalty that need to be examined. Specify a zero, if the tuning parameter is not wanted.}
+\item{ridgeSeq}{A range of values for the ridge penalty that need to be examined. Specify a zero if the tuning parameter is not wanted.}
 
-\item{lassoSeq}{A range of values for the lasso penalty that need to be examined. Specify a zero, if the tuning parameter is not wanted.}
+\item{lassoSeq}{A range of values for the lasso penalty that need to be examined. Specify a zero if the tuning parameter is not wanted.}
 
-\item{grouplassoSeq}{A range of values for the group lasso penalty that need to be examined. Specify a zero, if the tuning parameter is not wanted.}
+\item{grouplassoSeq}{A range of values for the group lasso penalty that need to be examined. Specify a zero if the tuning parameter is not wanted.}
 
-\item{elitistlassoSeq}{A range of values for the elitist lasso penalty that need to be examined. Specify a zero, if the tuning parameter is not wanted.}
+\item{elitistlassoSeq}{A range of values for the elitist lasso penalty that need to be examined. Specify a zero if the tuning parameter is not wanted.}
 
 \item{ncompSeq}{A range of integers for the number of components that need to be examined.}
 
-\item{tuningMethod}{A string indicating which model selection method should be used. "BIC" enables the baysian information criterion, "IS" enables the index of sparseness. "CV" enables crossvalidation with the EigenVector method, if crossvalidation is used, the number of folds nrFolds needs to be chosen. The number of folds should be an integer less than nrow(X). The data are then split in equal sized chunks if order of appearance.}
+\item{tuningMethod}{A string indicating which model selection method should be used. "BIC" enables the Bayesian information criterion, "IS" enables the index of sparseness. "CV" enables cross-validation (CV) with the EigenVector method, if CV is used, the number of folds nrFolds needs to be chosen. The number of folds should be an integer less than \code{nrow(X)}. The data are then split in equal sized chunks if order of appearance.}
 
-\item{groups}{A vector specifiying which columns of X belong to what block. Example: c(10, 100, 1000). The first 10 variables belong to the first block, the 100 variables after that belong to the second block etc.}
+\item{groups}{A vector specifying which columns of X belong to what block. Example: \code{c(10, 100, 1000)}. The first 10 variables belong to the first block, the 100 variables after that belong to the second block etc.}
 
 \item{itr}{The maximum number of iterations (a positive integer)}
 
-\item{coorDes}{A boolean with the default FALSE. If coorDes is FALSE the estimation of the majorizing function to estimate the component weights W conditional on the loadings P will be found using matrix inverses which can be slow. If set to true the marjozing function will be optimized (or partially optimized) using coordinate descent, in many cases coordinate descent will be faster}
+\item{coorDes}{A boolean with the default \code{FALSE}. If coorDes is \code{FALSE} the estimation of the majorizing function to estimate the component weights W conditional on the loadings P will be found using matrix inverses which can be slow. If set to \code{TRUE} the marjozing function will be optimized (or partially optimized) using coordinate descent, in some cases coordinate descent will be faster}
 
-\item{coorDesItr}{An integer specifying the maximum number of iterations for the coordinate descent algorithm, the default is set to 1. You do not have to run this algorithm until convergence before alternating back the the estimation of the loadings. The tolerance for this algorithm is hardcoded and set to 10^-8.}
+\item{coorDesItr}{An integer specifying the maximum number of iterations for the coordinate descent algorithm, the default is set to 1. You do not have to run this algorithm until convergence before alternating back to the estimation of the loadings. The tolerance for this algorithm is hardcoded and set to \code{10^-8}.}
 
-\item{printProgress}{A boolean: TRUE will print the progress of the model selection}
+\item{printProgress}{A boolean: \code{TRUE} will print the progress of the model selection}
 
-\item{nrFold}{An integer that specify the number of folds that Cross-validation should use if tuningmethod == "CV", the number of folds needs to be lower then nrow(X).}
+\item{nrFold}{An integer that specify the number of folds that Cross-validation should use if tuningmethod == "CV", the number of folds needs to be lower then \code{nrow(X)}.}
 
 \item{nStarts}{The number of random starts the analysis should perform. The first start will be a warm start. You can not give custom starting values.}
 }
 \value{
 A list containing: \cr
-\code{results} A list with ncomp elements each containing the following items in a list \cr
+\code{results} A list with \code{ncomp} elements each containing the following items in a list \cr
 \itemize{
- \item{"BIC, IS or MSPE"}{ The index chosen in tuningMethod for all combinations of ridge, lasso, grouplasso and elistist lasso}
- \item{"bestBIC, bestIS, bestMSPE or bestMSPE1stdErrorRule"}{ The best index according to the tuning method}
- \item{"bestBIC, bestIS, bestMSPE or bestMSPE1stdErrorRule"}{ The best index according to the tuning method}
- \item{"nNonZeroCoef"}{ The number of non zero coeffiecients in the best model}
+ \item{"BIC, IS or MSPE"}{ The index chosen in tuningMethod for all combinations of ridge, lasso, grouplasso and elististlasso}
+ \item{"bestBIC, bestIS, bestMSPE or bestMSPE1stdErrorRule"}{ The best index according to the chosen tuning method}
+ \item{"nNonZeroCoef"}{ The number of non zero weights in the best model}
  \item{"ridge"}{ The value of the ridge penalty corresponding to the best model}
  \item{"lasso"}{ The value of the lasso penalty corresponding to the best model}
  \item{"grouplasso"}{ The value of the group lasso penalty corresponding to the best model}
@@ -72,7 +71,7 @@ A list containing: \cr
 \code{bestNcomp} The number of component with the best value for the chosen tuning index \cr
 }
 \description{
-A function that performs model selection, for the regularizers and the numbner of components for mmsca()
+A function that performs model selection, for the regularizers and the number of components for \code{mmsca()}
 }
 \examples{
  
