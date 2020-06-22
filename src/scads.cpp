@@ -28,10 +28,10 @@
 //' J <- 30
 //' X <- matrix(rnorm(100*J), 100, J)
 //' ncomp <- 3 
-//' constraints <- matrix(1, J, ncomp) #no constraints 
+//' constraints <- matrix(1, J, ncomp) # No constraints 
 //' 
 //' scads(X, ncomp = ncomp, ridge = 10e-8, lasso = rep(1, ncomp), 
-//'         constraints = constraints, Wstart = matrix(0, ncomp, J))
+//'         constraints = constraints, Wstart = matrix(0, J, ncomp), itr = 10e5)
 //'         
 //' # Extended examples:
 //' # Example 1: Perform PCA with elistastic net regularization no constraints 

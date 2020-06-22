@@ -165,10 +165,213 @@ The main advantage of solving (\ref{ccpca}) is that this model tries to directly
 
 This model has been implemented in the `ccpca` function. This function will be discussed in detail in the next section.
 
-## Overview of available functions in the `sparseWeightBasedPCA` package
 
-The `sparseWeightBasedPCA` provides functions for the aforementioned models, also model selection procedures are provided in order to tune the hyper parameters. The main functions: `scads, mmsca` and `ccpca` are implemented in `C++` using the packages Rcpp and RcppArmadillo. The model selection procedures are implemented in `R`.  The functions of the package will be discussed after which examples will be given.
+## The implementation in `R` of the `sparseWeightBasedPCA` package
 
-## `scads`
+The `sparseWeightBasedPCA` provides functions for the aforementioned models, also model selection procedures are provided in order to tune the hyper parameters. The main functions: `scads, mmsca` and `ccpca` are implemented in `C++` using the packages Rcpp (REF) and RcppArmadillo (REF). The model selection procedures are implemented in `R`.  The functions of the package will be discussed after which detailed examples will be given.
+
+
+### Implementation of the main functions of the `sparseWeightBasedPCA` package
+
+The main functions: `scads`, `mmsca` and `ccpca` are all implemented in a similar manor. At the core they perform SCA/PCA with variations depending on the goals of the user. An typical minimal use case `scads` given below (`mmsca` and `ccpca` are implemented very similarly) first generate some fake data:
+
+```{r, eval = FALSE}
+J <- 30
+I <- 100
+X <- matrix(rnorm(I*J), I, J)
+```
+
+With this data `scads` can be run with supplied values for the minimal required arguments. This minimal example performs PCA, with no constraints and, ridge and LASSO regularization. 
+
+```{r, eval = FALSE}
+ncomp <- 3 
+constraints <- matrix(1, J, ncomp) # No constraints 
+res <- scads(X, 
+             ncomp = ncomp, 
+             ridge = 10e-8, 
+             lasso = rep(1, ncomp), 
+             constraints = constraints, 
+             Wstart = matrix(1, J, ncomp),
+             itr = 10e5)  
+```
+
+All the main functions: `scads`, `mmsca` and `ccpca` output a list with the following named elements:
+
+* `W` A matrix containing the component weights 
+* `P` A matrix containing the loadings 
+* `loss` A numeric variable containing the minimum loss function value of all the `nStarts` starts 
+* `converged` A boolean containing `TRUE` if converged `FALSE` if not converged.
+
+Details examples of data analysis will follow in the next section or see the documentation `?scads` et cetera. The main functions `scads`, `mmsca` and `ccpca` have a slightly different set of arguments. See the following list for the specifics.
+
+#### Overview of the `scads` arguments
+
+* `X` A data matrix of class `matrix`
+* `ncomp` The number of components to estimate (an integer)
+* `ridge` A numeric value containing the ridge parameter for ridge regularization on the component weight matrix W
+* `lasso` A vector containing a ridge parameter for each column of W separately, to set the same lasso penalty for the component weights W, specify: lasso = `rep(value, ncomp)`
+* `constraints` A matrix of the same dimensions as the component weights matrix W (`ncol(X)}` x `ncomp`). A zero entry corresponds in constraints corresponds to an element in the same location in W that needs to be constraint to zero. A non-zero entry corresponds to an element in the same location in W that needs to be estimated.
+* `itr` The maximum number of iterations (an integer)
+* `Wstart` A matrix of `ncomp` columns and `nrow(X)` rows with starting values for the component weight matrix W, if `Wstart` only contains zeros, a warm start is used: the first `ncomp` right singular vectors of X
+* `tol` The convergence is determined by comparing the loss function value after each iteration, if the difference is smaller than tol, the analysis is converged. The default value is `10e-8`.
+* `nStarts` The number of random starts the analysis should perform. The first start will be performed with the values given by `Wstart`. The consecutive starts will be `Wstart` plus a matrix with random uniform values times the current start number (the first start has index zero).
+* `printLoss` A boolean: `TRUE` will print the loss function value each 10th iteration.
+
+
+#### Overview of the `mmsca` arguments
+
+* `X` A data matrix of class `matrix`
+* `ncomp` The number of components to estimate (an integer)
+* `ridge` A vector containing a ridge parameter for each column of W separately, to set the same ridge penalty for the component weights W, specify: ridge = `rep(value, ncomp)`, value is a non-negative double
+* `lasso` A vector containing a ridge parameter for each column of W separately, to set the same lasso penalty for the component weights W, specify: lasso = `rep(value, ncomp)`, value is a non-negative double
+* `grouplasso` A vector containing a grouplasso parameter for each column of W separately, to set the same grouplasso penalty for the component weights W, specify: grouplasso = `rep(value, ncomp)`, value is a non-negative double
+* `elitistlasso` A vector containing a elitistlasso parameter for each column of W separately, to set the same elitistlasso penalty for the component weights W, specify: elitistlasso = `rep(value, ncomp)`, value is a non-negative double
+* `groups` A vector specifying which columns of `X` belong to what block. Example: `c(10, 100, 1000)`. The first 10 variables belong to the first block, the 100 variables after that belong to the second block etc.
+* `constraints` A matrix of the same dimensions as the component weights matrix W (`ncol(X)` x `ncomp`). A zero entry corresponds in constraints corresponds to an element in the same location in W that needs to be constraint to zero. A non-zero entry corresponds to an element in the same location in W that needs to be estimated.
+* `itr` The maximum number of iterations (a positive integer)
+* `Wstart` A matrix of `ncomp` columns and `nrow(X)` rows with starting values for the component weight matrix W, if `Wstart` only contains zeros, a warm start is used: the first `ncomp` right singular vectors of `X`
+* `tol` The convergence is determined by comparing the loss function value after each iteration, if the difference is smaller than `tol`, the analysis is converged. Default value is `10e-8`
+* `nStarts` The number of random starts the analysis should perform. The first start will be performed with the values given by `Wstart`. The consecutive starts will be `Wstart` plus a matrix with random uniform values times the current start number (the first start has index zero).
+* `printLoss` A boolean: `TRUE` will print the loss function value each 10th iteration.
+* `coorDes` A boolean with the default `FALSE`. If coorDes is `FALSE` the estimation of the majorizing function to estimate the component weights W conditional on the loadings P will be found using matrix inverses which can be slow. If set to true the majorizing function will be optimized (or partially optimized) using coordinate descent, in many cases coordinate descent will be faster
+* `coorDesItr` An integer specifying the maximum number of iterations for the coordinate descent algorithm, the default is set to 1. You do not have to run this algorithm until convergence before alternating back to the estimation of the loadings. The tolerance for this algorithm is hard coded and set to `10^-8`. 
+
+
+#### Overview of the `ccpca` arguments
+
+* `X` A data matrix of class `matrix`
+* `ncomp` The number of components to estimate (an integer)
+* `nzeros` A vector of length `ncomp` containing the number of desired zeros in the columns of the component weight matrix `W`
+* `itr` The maximum number of iterations (an integer)
+* `Wstart` A matrix of `ncomp` columns and `nrow(X)` rows with starting values for the component weight matrix `W`, if `Wstart` only contains zeros, a warm start is used: the first `ncomp` right singular vectors of `X`
+* `nStarts` The number of random starts the analysis should perform. The first start will be performed with the values given by `Wstart`. The consecutive starts will be `Wstart` plus a matrix with random uniform values times the current start number (the first start has index zero). The default value is 1.
+* `tol` The convergence is determined by comparing the loss function value after each iteration, if the difference is smaller than `tol` the analysis is converged. The default value is `10e-8`
+* `printLoss` A boolean: `TRUE` will print the loss function value each 10th iteration.
+
+
+### Implementation of the model selection functions of the `sparseWeightBasedPCA` package
+
+The to execute the `scads`, `mmsca` and `ccpca` arguments for the hyper parameters need to selected, for example the number of components or values for the `lasso` arguments. The `sparseWeightBasedPCA` package provides three procedures of selecting the hyper-parameters of the model: Cross-validation using the EigenVector method (REF), the Index of Sparseness (IS) and the Bayesian Information Criterion (BIC), for details see (REF). The procedures are implemented with in the functions: `CVforPCAwithSparseWeights`, `ISforPCAwithSparseWeights` and `BICforPCAwithSparseWeights`. They work as follows: first specify the arguments that the model selection function needs, then a pointer to the function that does the analysis should be given in the followed by its arguments. An example is given here:
+
+```{r, eval = FALSE}
+J <- 30
+I <- 100
+X <- matrix(rnorm(I*J), I, J)
+```
+With this data, `CVforPCAwithSparseWeights` using `scads` works as follows, 
+
+```{r, eval = FALSE}
+ncomp <- 3
+res <- CVforPCAwithSparseWeights(X = X, 
+                          nrFolds = 10, 
+                          FUN = scads, # Pointer to scads(), followed by the arguments
+                          ncomp = ncomp, 
+                          ridge = 0, 
+                          lasso = rep(0.1, ncomp),
+                          constraints = matrix(1, J, ncomp),
+                          Wstart = matrix(0, J, ncomp),
+                          itr = 10e5,
+                          printLoss = FALSE)
+                          
+```
+
+This function returns a list with the following elements:
+
+* `MSPE` The mean squared prediction error given the tuning parameters
+* `MSPEstdError` The standard error of the `MSPE` 
+* `nNonZeroCoef` The number of non-zero coefficients in the model 
+
+Model selection of the hyper-parameters can be based on the model that results in the lowest mean squared prediction error, or a model can be picked with the least number of non-zero coefficients still within one standard error of the model with the lowest mean squared prediction error. The other functions work similar check see `?BICforPCAwithSparseWeights` and `?ISforPCAwithSparseWeights` for more detailed information.
+
+
+### Additional tuning functions for `mmsca`
+
+This package provides more elaborate model selection functions for `mmsca`, because of its flexibility it can be overwhelming to use the basic tuning function provided. Two additional functions are provided `mmscaModelSelection` and `mmscaHyperCubeSelection`. `mmscaModelSelection` uses a fixed grid of all combinations of the hyper-parameters to pick the best combination from, whereas `mmscaHyperCubeSelection` uses an adaptive grid that zooms in on a good combination of hyper-parameters until it converges on a certain combination. Note that `mmscaHyperCubeSelection` is experimental, it could potentially speed up the process of tuning enormously but it has not been scrutinized using a simulation study. A basic example of both is given here:
+
+To perform model selection with `mmsca` using an exhaustive grid of all combinations of the tuning parameters the following can be done: 
+
+```{r, eval = FALSE}
+J <- 30
+I <- 100
+X <- matrix(rnorm(I*J), I, J)
+
+out <- mmscaModelSelection(X, 
+            ridgeSeq = seq(0, 1, by = 0.1), # Sequences of the hyper parameter
+            lassoSeq = 0:100, 
+            grouplassoSeq = 0, # No group lasso and no elitist lasso
+            elitistlassoSeq = 0, 
+            ncompSeq = 1:3, 
+            tuningMethod = "CV", # Indicate the tuning method
+            nrFolds = 10, 
+            groups = ncol(X), # Arguments for mmsca()
+            itr = 100000, 
+            nStart = 1, 
+            coorDes = FALSE, 
+            coorDesItr = 100, 
+            printProgress = TRUE)
+```
+
+This function returns a list with two elements: 
+
+* `results` A list with `ncomp` elements each containing the following elements
+    - `"BIC, IS or MSPE"` The index chosen in tuningMethod for all combinations of ridge, lasso, grouplasso and elististlasso
+    - `"bestBIC, bestIS, bestMSPE or bestMSPE1stdErrorRule"` The best index according to the chosen tuning method
+    - `"nNonZeroCoef"` The number of non zero weights in the best model
+    - `"ridge"` The value of the ridge penalty corresponding to the best model
+    - `"lasso"` The value of the lasso penalty corresponding to the best model
+    - `"grouplasso"` The value of the group lasso penalty corresponding to the best model
+    - `"elististlasso"` The value of the elitist lasso penalty corresponding to the best model
+    - `"ncomp"` The number of component that was used for these items
+    - `"ridge1stdErrorRule"` In case tuningMethod == "CV", the value of the ridge penalty according to the 1 standard error rule: the most sparse model within one standard error of the model with the lowest MSPE
+    - `"lasso1stdErrorRule"` In case tuningMethod == "CV", the value of the lasso penalty according to the 1 standard error rule: the most sparse model within one standard error of the model with the lowest MSPE
+    - `"grouplasso1stdErrorRule"` In case tuningMethod == "CV", the value of the group lasso penalty according to the 1 standard error rule: the most sparse model within one standard error of the model with the lowest MSPE
+    - `"elitistlasso1stdErrorRule"` In case tuningMethod == "CV", the value of the elitist lasso penalty according to the 1 standard error rule: the most sparse model within one standard error of the model with the lowest MSPE
+    - `"ridge1stdErrorRule"` In case tuningMethod == "CV", the value of the ridge according to the 1 standard error rule: the most sparse model within one standard error of the model with the lowest MSPE
+*  `bestNcomp` The number of component with the best value for the chosen tuning index
+ 
+For more details `?mmscaModelSelection`. This procedure can be slow because the number of combinations can be great it takes a lot of time to evaluate them all in order to pick the best one. To that end we also provide an alternative way of tuning using `mmscaHyperCubeSelection`. This function tunes a grid of the tuning parameters determine by the min and max of their corresponding sequences and a step size the provided by `stepsize` argument. It picks out the best combination, and zooms in on that combination, by making a new smaller grid around the previous best combination. This process continues until the average range of the sequences is less than 0.05. The new sequences are determined by taking the minimum value to be: best value - range, and maximum value by: best value + range, and a pre-specified step size in `stepsize`. In order for this procedure to work well, the grid needs to include an optimal combination of tuning parameters, and it needs a reasonable step size (at least 3, 5 is better, 2 is too small). This approach assumes that a local optimum of tuning parameters is good enough to get interpretable results. Note that this function is experimental and has not been scrutinized using a simulation study. This procedure can be performed as follows,
+
+```{r, eval = FALSE}
+
+out <- mmscaHyperCubeSelection(X,
+              ncomp = 3, # This function works with a fixed number of components
+              ridgeSeq = 0:3,
+              lassoSeq = 0:10,
+              grouplassoSeq = 0,
+              elitistlassoSeq = 0,
+              stepsize = 5, # Step size of the sequences
+              logscale = FALSE, # Sequences can be on the log-scale
+              method = "CV1stdError", # Tuning method
+              groups = ncol(X), # Arguments for mmsca()
+              nStart = 1,
+              itr = 100000,
+              printProgress = TRUE,
+              coorDes = FALSE,
+              coorDesItr = 1,
+              tol = 10e-5,
+              nrFolds = 10)
+```
+
+This function returns a list with the following elements:
+
+* `ridge` A vector with `ncomp` elements all equal to the chosen ridge value 
+* `lasso` A vector with `ncomp` elements all equal to the chosen lasso value 
+* `grouplasso` A vector with `ncomp` elements all equal to the chosen group lasso value 
+* `elitistlasso` A vector with `ncomp` elements all equal to the chosen elitist lasso value 
+
+For more details see `?mmscaHyperCubeSelection`. 
+
+
+## Detailed examples of SCA and PCA with the `sparseWeightBasedPCA` package
+
+In this section we will some detailed examples where we analyze multi- and single block data with SCA and PCA, including model selection.
+
+### Example of SCA with `sdfscads`
+
+### Example of SCA with `mmsca`
+
+### Example of PCA with `ccpca`
+
+
 
 

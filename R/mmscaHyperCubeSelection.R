@@ -47,7 +47,7 @@ determineRange <- function(best, range, stepsize, logscale){
 
 #' Hyper Cube Model selection for MMSCA  
 #'
-#' A function that performs model selection for the regularizers of mmsca(). This function tunes a grid of the tuning parameters given their sequences. It picks out the best combination, and zooms in on that combination, by making a new smaller grid around the previous best combination. This process continues until the average range of the sequences is less than 0.05. The sequences are determined by taking the minium value to be: best value - range, and maximum value by: best value + range, and a pre-specified step size. The grid is constructed by taking all combinations of the sequences. The size of the grid shrinks by half each time a new combination is found.
+#' A function that performs model selection for the regularizers of mmsca(). This function tunes a grid of the tuning parameters determine by the min and max of their corresponding sequences and a step size the provided by \code{stepsize} argument. It picks out the best combination, and zooms in on that combination, by making a new smaller grid around the previous best combination. This process continues until the average range of the sequences is less than 0.05. The new sequences are determined by taking the minimum value to be: best value - range, and maximum value by: best value + range, and a pre-specified step size in \code{stepsize}. 
 #'
 #' @param X A data matrix of class \code{matrix}
 #' @param ridgeSeq A range of values for the ridge penalty that need to be examined. Specify a zero if the tuning parameter is not wanted.
@@ -68,8 +68,8 @@ determineRange <- function(best, range, stepsize, logscale){
 #' @return A list containing: \cr
 #' \code{ridge} A vector with \code{ncomp} elements all equal to the chosen ridge value \cr
 #' \code{lasso} A vector with \code{ncomp} elements all equal to the chosen lasso value \cr
-#' \code{grouplasso} A vector with \code{ncomp} elements all equal to the chosen grouplasso value \cr
-#' \code{elitistlasso} A vector with \code{ncomp} elements all equal to the chosen ridge value \cr
+#' \code{grouplasso} A vector with \code{ncomp} elements all equal to the chosen group lasso value \cr
+#' \code{elitistlasso} A vector with \code{ncomp} elements all equal to the chosen elitist lasso value \cr
 #' @examples
 #'  
 #' # Example select the lasso and ridge parameter for mmsca()
