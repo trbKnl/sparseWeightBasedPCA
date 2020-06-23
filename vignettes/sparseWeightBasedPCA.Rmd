@@ -346,6 +346,7 @@ out <- mmscaHyperCubeSelection(X,
               elitistlassoSeq = 0,
               stepsize = 5, # Step size of the sequences
               logscale = FALSE, # Sequences can be on the log-scale
+              stopWhenRange = 0.01, # stop when average range is < 0.01
               method = "CV1stdError", # Tuning method
               groups = ncol(X), # Arguments for mmsca()
               nStart = 1,
@@ -373,7 +374,11 @@ In this section we will give some detailed examples where we analyze multi- and 
 \begin{equation}
     \mathbf{X} = \mathbf{X}\mathbf{W}\mathbf{P}^T,
 \end{equation}
-where $\mathbf{W}$ is $J\times J$, $\mathbf{W}^T\mathbf{W} = \mathbf{I}$ and $\mathbf{W} = \mathbf{P}$. $\mathbf{W}$ is manipulated such that it contains a given level of sparsity in the first $Q$ columns. The covariance matrix of $\mathbf{X}$ can be constructed by taking $\mathbf{\Sigma} = \mathbf{W}\mathbf{\Lambda}\mathbf{W}^T$, the eigenvalues in $\mathbf{\Lambda}$ can be manipulated to control the variance of the signal components versus the variance of the noise components. Using the covariance matrix data can be sampled from the multivariate normal distribution using `mvrnorm` from the package MASS (REF). Functions for data generation are provided by: `sparsify` to put sparsity in $\mathbf{W}$, `makeVariance` to manipulate the eigenvalues in $\mathbf{\Lambda}$, and `makeDat` to simulate the data. Check the package documentation for more details.
+where $\mathbf{W}$ is $J\times J$, $\mathbf{W}^T\mathbf{W} = \mathbf{I}$ and $\mathbf{W} = \mathbf{P}$. $\mathbf{W}$ is manipulated such that it contains a given level of sparsity in the first $Q$ columns. The covariance matrix of $\mathbf{X}$ can be constructed by taking $\mathbf{\Sigma} = \mathbf{W}\mathbf{\Lambda}\mathbf{W}^T$, the eigenvalues in $\mathbf{\Lambda}$ can be manipulated to control the variance of the signal components versus the variance of the noise components. Using the covariance matrix data can be sampled from the multivariate normal distribution using `mvrnorm` from the package MASS (REF). 
+Functions for data generation are provided by: 
+* `sparsify` to put sparsity in $\mathbf{W}$
+* `makeVariance` to manipulate the eigenvalues in $\mathbf{\Lambda}$
+* `makeDat` to simulate the data. Check the package documentation for more details.
 
 
 ### Example of SCA with `scads`
@@ -474,92 +479,134 @@ round(compare, 3)
 
 ```
 
-This concludes the analysis of multi-block data with `scads`. This procedure offers lots of flexibility to the user at the cost of a little more complexity (i.e. the user has to know for-loops and some `R` basics).
-
+This concludes the analysis of multi-block data with `scads`. 
+This procedure offers lots of flexibility to the user at the cost of a little more complexity (i.e. the user has to know for-loops and some `R` basics). Note that the model selection procedures can be easily sped up making use of parallel versions of the for-loops. 
 
 ### Example of SCA with `mmsca`
 
+We will now demonstrate data analysis using `mmsca`. In this example we will use the same data as in the `scads` example. We will demonstrate the use of `mmscaHyperCubeSelection` as already for this toy-example tuning an exhaustive grid with `mmscaModelSelection` takes too long. Here we also use cross validation with the one standard error rule.
 
-```{r}
+```{r, eval = FALSE}
 
-
-results <- mmscaHyperCubeSelection(X,
+# Tune the hyper parameters by looking at an adaptive grid that zooms in around plausible values
+out <- mmscaHyperCubeSelection(X,
               ncomp = 3,
-              ridgeSeq = 0,
-              lassoSeq = 0:1,
-              grouplassoSeq = 0:1,
-              elitistlassoSeq = 0,
-              stepsize = 5,
-              logscale = TRUE,
-              groups = ncol(X),
+              ridgeSeq = 0, # No ridge
+              lassoSeq = 0:10, # Lasso from 0 to 10
+              grouplassoSeq = 0:10,  # Lasso from 0 to 10
+              elitistlassoSeq = 0, # No elitist lasso
+              stepsize = 3,
+              logscale = FALSE,
+              stopWhenRange = 0.01, # Stop when average range is < 0.01
+              groups = c(15, 15),
               nStart = 1,
               itr = 100000,
-              printProgress = TRUE,
+              printProgress = FALSE,
               coorDes = FALSE,
               coorDesItr = 1,
               method = "CV1stdError",
               tol = 10e-5,
               nrFolds = 10)
 
-fit <- mmsca(X = X, 
-    ncomp = ncomp, 
-    ridge = rep(0, ncomp),
-    lasso = results$lasso,
-    grouplasso = results$grouplasso,
-    elitistlasso = rep(0, ncomp),
-    groups = c(J/2, J/2), 
-    constraints = matrix(1, J, ncomp), 
-    itr = 1000000, 
-    Wstart = matrix(0, J, ncomp),
-    nStarts = 1)
+# Inspect the chosen hyper parameters
+out
 
+# Run the analysis with the chosen hyper parameters
+results <- mmsca(X = X, 
+            ncomp = ncomp, 
+            ridge = out$ridge, 
+            lasso = out$lasso,
+            grouplasso = out$grouplasso, 
+            elitistlasso = out$elitistlasso,
+            groups = c(15, 15), 
+            constraints = matrix(1, J, ncomp), 
+            itr = 1000000, 
+            Wstart = matrix(0, J, ncomp),
+            nStarts = 1,
+            printLoss = FALSE)
 
-fit <- mmsca(X = X, 
-    ncomp = ncomp, 
-    ridge = rep(0, ncomp),
-    lasso = rep(0.0001, ncomp),
-    grouplasso = rep(0.0001, ncomp),
-    elitistlasso = rep(0, ncomp),
-    groups = c(J/2, J/2), 
-    constraints = matrix(1, J, ncomp), 
-    itr = 1000000, 
-    Wstart = matrix(0, J, ncomp),
-    nStarts = 1)
-?mmsca
-
-fit$W
-dat$P[, 1:ncomp]
-lasso
-
-lasso <- exp(seq(log(0.001), log(1), length.out = 10)) # Generate candidate lasso values
-grouplasso <- exp(seq(log(0.001), log(1), length.out = 10)) # Generate candidate lasso values
-
-mmscaModelSelection(X, 
-        ridgeSeq = 0,
-        lassoSeq = lasso,
-        grouplassoSeq = grouplasso,
-        elitistlassoSeq = 0, 
-        ncompSeq = 3, 
-        tuningMethod = "CV", 
-        groups = c(15, 15), 
-        nrFolds = 10, 
-        itr = 10000, 
-        nStart = 1, 
-        tol = 10e-5,
-        coorDes = FALSE, 
-        coorDesItr = 100, 
-        printProgress = TRUE)
-
+# Compare results from the analysis with the data generating model
+compare <- cbind(dat$P[, 1:ncomp], results$W)
+colnames(compare) <- c(paste("True W_", 1:3, sep = ""), paste("Est W_", 1:3, sep = ""))
+rownames(compare) <- paste("Var", 1:30) 
+round(compare, 3)
 
 ```
 
+This conclude the demonstration. We now demonstrate another interesting use case for `mmsca` where a researcher wants to identifying common and distinctive components and where an exhaustive approach might fail because there are too many data blocks and components. We use multi-block data with 5 blocks and 5 variables per block and 5 components.
+
+```{r}
+
+# Generate the data
+set.seed(1)
+ncomp <- 5 
+J <- 30
+comdis <- matrix(0, J, ncomp) # Component weight structure
+comdis[1:5, 1] <- 1 
+comdis[6:10, 2] <- 1 
+comdis[25:30, 3] <- 1 
+comdis[11:15, 4] <- 1 
+comdis[0:10, 5] <- 1 
+comdis[16:30, 5] <- 1 
+
+# check the generated component weight structure
+comdis
+
+# Generate data according to that structure
+variances <- makeVariance(varianceOfComps = c(100, 80, 90, 50, 60), 
+                          J = J, error = 0.05) #create realistic eigenvalues
+
+dat <- makeDat(n = 100, comdis = comdis, variances = variances)
+X <- dat$X
+
+# Tune the group lasso parameter
+out <- mmscaHyperCubeSelection(X,
+              ncomp = ncomp,
+              ridgeSeq = 0, # No ridge
+              lassoSeq = 0, # No lasso 
+              grouplassoSeq = 0:10,  # Lasso from 0 to 10
+              elitistlassoSeq = 0, # No elitist lasso
+              stepsize = 3,
+              logscale = FALSE,
+              stopWhenRange = 0.01, # Stop when average range is < 0.01
+              groups = c(5, 5, 5, 5, 5, 5), 
+              nStart = 1,
+              itr = 100000,
+              printProgress = FALSE, # When doing analysis set this to TRUE
+              coorDes = FALSE,
+              coorDesItr = 1,
+              method = "CV1stdError",
+              tol = 10e-5,
+              nrFolds = 10)
+
+# Inspect the chosen group lasso 
+out
+
+# Run the analysis
+results <- mmsca(X = X, 
+                ncomp = ncomp, 
+                ridge = out$ridge, 
+                lasso = out$lasso,
+                grouplasso = out$grouplasso, 
+                elitistlasso = out$elitistlasso,
+                groups = c(5, 5, 5, 5, 5, 5), 
+                constraints = matrix(1, J, ncomp), 
+                itr = 1000000, 
+                Wstart = matrix(0, J, ncomp),
+                nStarts = 1,
+                printLoss = FALSE)
+
+# Check results from the analysis
+colnames(results$W) <- paste("Est W_", 1:5, sep = "")
+rownames(results$W) <- paste("Var", 1:30) 
+round(results$W, 3)
+
+```
+
+The data generating structure has been estimated back well. You can see some small coefficients still being estimated, if you increase the `grouplasso` these small coefficients will be put to zero. 
 
 
-
-
-
-
-
+### Example of PCA with `ccpca`
 
 
 
