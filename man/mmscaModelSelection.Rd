@@ -16,6 +16,7 @@ mmscaModelSelection(
   nrFolds = NULL,
   itr = 1e+06,
   nStart = 1,
+  tol = 1e-07,
   coorDes = TRUE,
   coorDesItr = 100,
   printProgress = TRUE
@@ -39,6 +40,8 @@ mmscaModelSelection(
 \item{groups}{A vector specifying which columns of X belong to what block. Example: \code{c(10, 100, 1000)}. The first 10 variables belong to the first block, the 100 variables after that belong to the second block etc.}
 
 \item{itr}{The maximum number of iterations (a positive integer)}
+
+\item{tol}{The convergence is determined by comparing the loss function value after each iteration, if the difference is smaller than \code{tol}, the analysis is converged. Default value is \code{10e-8}}
 
 \item{coorDes}{A boolean with the default \code{FALSE}. If coorDes is \code{FALSE} the estimation of the majorizing function to estimate the component weights W conditional on the loadings P will be found using matrix inverses which can be slow. If set to \code{TRUE} the marjozing function will be optimized (or partially optimized) using coordinate descent, in some cases coordinate descent will be faster}
 
