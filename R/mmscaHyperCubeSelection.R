@@ -47,7 +47,7 @@ determineRange <- function(best, range, stepsize, logscale){
 
 #' Hyper Cube Model selection for MMSCA  
 #'
-#' A function that performs model selection for the regularizers of mmsca(). This function tunes a grid of the tuning parameters determine by the min and max of their corresponding sequences and a step size the provided by \code{stepsize} argument. It picks out the best combination, and zooms in on that combination, by making a new smaller grid around the previous best combination. This process continues until the average range of the sequences is less than 0.05. The new sequences are determined by taking the minimum value to be: best value - range, and maximum value by: best value + range, and a pre-specified step size in \code{stepsize}. 
+#' A function that performs model selection for the regularizers of mmsca(). This function tunes a grid of the tuning parameters determine by the min and max of their corresponding sequences and a step size the provided by \code{stepsize} argument. It picks out the best combination, and zooms in on that combination, by making a new smaller grid around the previous best combination. This process continues until the average range of the sequences is less than \code{stopWhenRange}. The new sequences are determined by taking the minimum value to be: best value - range, and maximum value by: best value + range, and a pre-specified step size in \code{stepsize}. 
 #'
 #' @param X A data matrix of class \code{matrix}
 #' @param ridgeSeq A range of values for the ridge penalty that need to be examined. Specify a zero if the tuning parameter is not wanted.
@@ -56,6 +56,7 @@ determineRange <- function(best, range, stepsize, logscale){
 #' @param elitistlassoSeq A range of values for the elitist lasso penalty that need to be examined. Specify a zero if the tuning parameter is not wanted.
 #' @param stepsize The sequences of ridgeSeq, lassoSeq, grouplassoSeq, and elitistlassoSeq are constructed by \code{seq(min(seq), max(seq), by = stepsize)}. So \code{stepsize} determines how fine the grid is. 
 #' @param logscale determines whether the sequences are on the log-scale or not. By default it is set to \code{FALSE}. 
+#' @param stopWhenRange A numeric value with default 0.05. If the average range of the tuning sequences is less than this value the algorithm stops.
 #' @param groups A vector specifying which columns of X belong to what block. Example: \code{c(10, 100, 1000)}. The first 10 variables belong to the first block, the 100 variables after that belong to the second block etc. 
 #' @param nrFold An integer that specify the number of folds that Cross-validation should use if tuningmethod == "CV", the number of folds needs to be lower then \code{nrow(X)}. 
 #' @param nStart The number of random starts the analysis should perform. The first start will be a warm start, W will be started with the first Q right singular vectors of X. You can not give custom starting values. 
@@ -120,7 +121,7 @@ determineRange <- function(best, range, stepsize, logscale){
 #' 
 #' @export
 mmscaHyperCubeSelection <- function(X, ncomp, ridgeSeq, lassoSeq, grouplassoSeq,
-          elitistlassoSeq, stepsize, logscale = FALSE, 
+          elitistlassoSeq, stepsize, logscale = FALSE, stopWhenRange = 0.05,
           groups, nrFolds = NULL, nStart, itr = 10e5, printProgress = TRUE, 
           coorDes = TRUE, coorDesItr = 1, tol = 10e-8, method = "BIC") {
 
@@ -132,7 +133,7 @@ mmscaHyperCubeSelection <- function(X, ncomp, ridgeSeq, lassoSeq, grouplassoSeq,
     range  <- rapply(seql, function(x){return((max(x) - min(x)) / 2)}, how="list") 
     best <- rapply(seql, mean, how = "list") 
 
-    while(mean(unlist(range)) > 0.05){
+    while(mean(unlist(range)) > stopWhenRange){
 
         # Calculate the sequences
         for(i in 1:length(seql)) {

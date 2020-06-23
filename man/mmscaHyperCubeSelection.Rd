@@ -13,6 +13,7 @@ mmscaHyperCubeSelection(
   elitistlassoSeq,
   stepsize,
   logscale = FALSE,
+  stopWhenRange = 0.05,
   groups,
   nrFolds = NULL,
   nStart,
@@ -38,6 +39,8 @@ mmscaHyperCubeSelection(
 \item{stepsize}{The sequences of ridgeSeq, lassoSeq, grouplassoSeq, and elitistlassoSeq are constructed by \code{seq(min(seq), max(seq), by = stepsize)}. So \code{stepsize} determines how fine the grid is.}
 
 \item{logscale}{determines whether the sequences are on the log-scale or not. By default it is set to \code{FALSE}.}
+
+\item{stopWhenRange}{A numeric value with default 0.05. If the average range of the tuning sequences is less than this value the algorithm stops.}
 
 \item{groups}{A vector specifying which columns of X belong to what block. Example: \code{c(10, 100, 1000)}. The first 10 variables belong to the first block, the 100 variables after that belong to the second block etc.}
 
@@ -65,7 +68,7 @@ A list containing: \cr
 \code{elitistlasso} A vector with \code{ncomp} elements all equal to the chosen elitist lasso value \cr
 }
 \description{
-A function that performs model selection for the regularizers of mmsca(). This function tunes a grid of the tuning parameters determine by the min and max of their corresponding sequences and a step size the provided by \code{stepsize} argument. It picks out the best combination, and zooms in on that combination, by making a new smaller grid around the previous best combination. This process continues until the average range of the sequences is less than 0.05. The new sequences are determined by taking the minimum value to be: best value - range, and maximum value by: best value + range, and a pre-specified step size in \code{stepsize}.
+A function that performs model selection for the regularizers of mmsca(). This function tunes a grid of the tuning parameters determine by the min and max of their corresponding sequences and a step size the provided by \code{stepsize} argument. It picks out the best combination, and zooms in on that combination, by making a new smaller grid around the previous best combination. This process continues until the average range of the sequences is less than \code{stopWhenRange}. The new sequences are determined by taking the minimum value to be: best value - range, and maximum value by: best value + range, and a pre-specified step size in \code{stepsize}.
 }
 \examples{
  

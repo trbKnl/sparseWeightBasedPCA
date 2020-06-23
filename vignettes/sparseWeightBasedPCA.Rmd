@@ -409,7 +409,7 @@ round(dat$P[, 1:ncomp], 3) # The data generating component weight structure
 
 In the scree plot you can see the eigenvalues of the data generating covariance matrix and `round(dat$P[, 1:ncomp], 3)` prints the data generating component weights for the signal components. Given this generate data set we can perform `scads` by first looking for the common and distinctive structure by trying all structures out and finding the best structure according to model selection, in this case we will use cross-validation. To generate all common and distinctive structures we implemented a function called `allCommonDistinctive` for more details see the documentation.
 
-```{r, eval = TRUE}
+```{r, eval = FALSE}
 # Generate all possible common and distinctive structures
 allstructures <- allCommonDistinctive(vars = c(15, 15), ncomp = 3, allPermutations = TRUE, filterZeroSegments = TRUE)
 
@@ -429,7 +429,7 @@ allstructures[[which.min(index)]] # print the best common and distinctive struct
 
 Given this common and distinctive structure we can tune the `lasso` parameter to get some sparsity inside the weights, for this we will use cross validation with the one standard error rule. This entails cross validating the model a bunch of times for different values of the `lasso` parameter, from which we will select the model with the most weights at zero still within one standard error of the model with the least mean squared prediction error (MSPE). If there are not models within one standard error of the best model you should decrease the step size of the lasso sequence.
 
-```{r}
+```{r, eval = FALSE}
 
 lasso <- exp(seq(log(0.0000001), log(1), length.out = 100)) # Generate candidate lasso values
 MSPE <- rep(NA, length(lasso))
@@ -478,3 +478,89 @@ This concludes the analysis of multi-block data with `scads`. This procedure off
 
 
 ### Example of SCA with `mmsca`
+
+
+```{r}
+
+
+results <- mmscaHyperCubeSelection(X,
+              ncomp = 3,
+              ridgeSeq = 0,
+              lassoSeq = 0:1,
+              grouplassoSeq = 0:1,
+              elitistlassoSeq = 0,
+              stepsize = 5,
+              logscale = TRUE,
+              groups = ncol(X),
+              nStart = 1,
+              itr = 100000,
+              printProgress = TRUE,
+              coorDes = FALSE,
+              coorDesItr = 1,
+              method = "CV1stdError",
+              tol = 10e-5,
+              nrFolds = 10)
+
+fit <- mmsca(X = X, 
+    ncomp = ncomp, 
+    ridge = rep(0, ncomp),
+    lasso = results$lasso,
+    grouplasso = results$grouplasso,
+    elitistlasso = rep(0, ncomp),
+    groups = c(J/2, J/2), 
+    constraints = matrix(1, J, ncomp), 
+    itr = 1000000, 
+    Wstart = matrix(0, J, ncomp),
+    nStarts = 1)
+
+
+fit <- mmsca(X = X, 
+    ncomp = ncomp, 
+    ridge = rep(0, ncomp),
+    lasso = rep(0.0001, ncomp),
+    grouplasso = rep(0.0001, ncomp),
+    elitistlasso = rep(0, ncomp),
+    groups = c(J/2, J/2), 
+    constraints = matrix(1, J, ncomp), 
+    itr = 1000000, 
+    Wstart = matrix(0, J, ncomp),
+    nStarts = 1)
+?mmsca
+
+fit$W
+dat$P[, 1:ncomp]
+lasso
+
+lasso <- exp(seq(log(0.001), log(1), length.out = 10)) # Generate candidate lasso values
+grouplasso <- exp(seq(log(0.001), log(1), length.out = 10)) # Generate candidate lasso values
+
+mmscaModelSelection(X, 
+        ridgeSeq = 0,
+        lassoSeq = lasso,
+        grouplassoSeq = grouplasso,
+        elitistlassoSeq = 0, 
+        ncompSeq = 3, 
+        tuningMethod = "CV", 
+        groups = c(15, 15), 
+        nrFolds = 10, 
+        itr = 10000, 
+        nStart = 1, 
+        tol = 10e-5,
+        coorDes = FALSE, 
+        coorDesItr = 100, 
+        printProgress = TRUE)
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
