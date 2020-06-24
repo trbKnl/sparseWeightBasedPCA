@@ -18,19 +18,23 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r}
+```{r, echo = FALSE}
 library(sparseWeightBasedPCA)
 ```
 
 
 # `sparseWeightBasedPCA`: A package for Regularized weight based Simultaneous Component Analysis (SCA) and Principal Component Analysis (PCA)
 
+## Introduction
+
+We introduce an `R` package to perform regularized SCA and PCA with sparsity on the component weights, the package includes model selection procedures. The procedures developed are based on recent work by de Schipper and Van Deun. The main procedures of the package have been written in `C++` to provide maximal efficiency of the underlying numerical computations. In this vignette we will introduce the reader to PCA and its multi-block extension SCA, followed by a substantiation of the models that the procedures in this package estimate. After that the `R` implementation of the package is discussed followed by detailed examples of data analysis and model selection.
+
 ## Theoretical background
 
 ### Principal Component Analysis
 Principal component analysis (PCA) is a widely used analysis technique for data reduction. It can give crucial insights in the underlying structure of the data when used as a latent variable model.
 
-Given a data matrix $\mathbf{X}$ that contains the scores for $i = 1...I$ observations on $j = 1...J$ variables; we follow the convention to present the $J$ variable scores of observation $i$ in row $i$ and thus $\mathbf{X}$ has size $I \times J$. PCA decomposes the data into $Q$ components as follows,
+Given a data matrix $\mathbf{X}$ that contains the scores for $i = 1...I$ observations on $j = 1...J$ variables; we follow the convention to present the $J$ variable scores of observation $i$ in row $i$ and thus $\mathbf{X}$ has size $I \times J$, PCA decomposes the data into $Q$ components as follows,
 \begin{equation}
     \label{PCA}
     \begin{aligned}
@@ -87,8 +91,6 @@ The `sparseWeightBasedPCA` package will provide functions that perform PCA and S
 2. `mmsca` Regularized SCA with sparse component weights using the group LASSO
 3. `ccpca` PCA with sparse component weights using cardinality constraints
 
-WRITE HERE WHAT OTHER PACKAGES DO
-
 ## Models of the `sparseWeightBasedPCA` package
 
 ### Regularized SCA with sparse component weights using constraints 
@@ -105,7 +107,7 @@ Here we present an approach of performing regularized SCA, with ridge and LASSO 
 \end{equation}
 In order to get a minimum for (\ref{scads}) we alternate between the estimation of  $\mathbf{W}_c$ and $\mathbf{P}_c$. Given $\mathbf{W}_c$ we can estimate $\mathbf{P}_c$ by using procrustes rotation. Given $\mathbf{P}_c$ we find estimates for $\mathbf{W}_c$ by using a coordinate descent algorithm that works by soft-thresholding the weights. For the specifics we refer the reader to (REF: NIEK KATRIJN). This iterative procedure stops when an optimum has been found (.i.e the loss function value is not decreasing anymore beyond pre-specified tolerance level). The optimization problem in (\ref{mmsca}) is non-convex and meaning there are local minima. In order to deal with that multiple random starts can be used with different initializations of $\mathbf{W}$, the start leading to the lowest evaluation of (\ref{mmsca}) is retained. Typically starting the algorithm with the solution of PCA (e.g. the first $Q$ right singular vectors of $\mathbf{X}$) will lead to smallest optimum.
 
-The main advantage of analyzing multi-block data by using this procedure is that it is fast, and scalable to large data sets thanks to the coordinate descent implementation. The inclusion of the blockwise constraints on $\mathbf{W}$ make sure common and distinctive components are found and the LASSO and ridge regularizers are optional and facilitate extra sparsity within the component weights. A disadvantage of the method is that  the common and distinctive structures for $\mathbf{W}$ need to be selected. This has to be done using model selection procedures and can be computationally demanding.
+The main advantage of analyzing multi-block data by using this procedure is that it is fast, and scalable to large data sets thanks to the coordinate descent implementation. The inclusion of the blockwise constraints on $\mathbf{W}$ make sure common and distinctive components are found, the LASSO and ridge regularizers are optional and facilitate extra sparsity within the component weights. A disadvantage of the method is that the common and distinctive structure for $\mathbf{W}$ need to be selected. This has to be done using model selection procedures and can be computationally demanding.
 
 This procedure has been implemented in the `scads` function. This function will be discussed in detail in the next section and examples will be given outlining the analysis including model selection.
 
@@ -126,7 +128,7 @@ Here we present a very flexible approach of performing regularized SCA using, ri
 where $\mathbf{W}_c = [(\mathbf{W}^{(1)})^{T} \hdots (\mathbf{W}^{(K)})^{T}]^{T}$, and $\mathbf{w}^{(k)}_{q}$ denotes the $q$th column from the submatrix $\mathbf{W}^{(k)}$.
 In order to get a minimum for (\ref{mmsca}) we alternate between the estimation of  $\mathbf{W}_c$ and $\mathbf{P}_c$. Given $\mathbf{W}_c$ we can estimate $\mathbf{P}_c$ by using procrustes rotation. Given $\mathbf{P}_c$ we can find estimates for $\mathbf{W}_c$ by using the majorization minimization (MM) algorithm. For the specifics we refer the reader to (REF: NIEK KATRIJN). This iterative procedure stops when an optimum has been found (.i.e the loss function value is not decreasing anymore beyond pre-specified tolerance level). The optimization problem in (\ref{mmsca}) is non-convex and meaning there are local minima. In order to deal with that multiple random starts can be used with different initializations of $\mathbf{W}$, the start leading to the lowest evaluation of (\ref{mmsca}) is retained. Typically starting the algorithm with the solution of PCA (e.g. the first $Q$ right singular vectors of $\mathbf{X}$) will lead to smallest optimum.
 
-The main advantage of solving (\ref{mmsca}) is that it can automatically look for common and distinctive components by taking advantage of the properties of the group lasso. Because the group LASSO is specified on the colored segments (see below), it will either include these segments or put them zero, uncovering common and distinctive components. This is especially useful if the number of blocks and components is large, and an exhaustive approach of identifying common and distinctive is too computationally intensive.
+The main advantage of solving (\ref{mmsca}) is that it can automatically look for common and distinctive components by taking advantage of the properties of the group LASSO. Because the group LASSO is specified on the colored segments (see below), it will either include these segments or put them zero, uncovering common and distinctive components. This is especially useful if the number of blocks and components is large, and an exhaustive approach of identifying common and distinctive is too computationally demanding.
 \[ \mathbf{T}
     =
     \begin{bmatrix}
@@ -163,7 +165,7 @@ Here we present an approach of solving PCA by applying cardinality constraints t
         &\text{subject to } \mathbf{W} \text{ including } K \text{ zeros}.
 \end{aligned}
 \end{equation}
-In order to get a minimum for (\ref{ccpca}) we need to alternate between the estimation of $\mathbf{W}$ and $\mathbf{P}$. Given $\mathbf{W}$ we can estimate $\mathbf{P}$ by using procruste rotation (REF: Ten_Berge_2005, Zou_2006), $\mathbf{P} = \mathbf{UV}^T$, where $\mathbf{U}$ and $\mathbf{V}$ are the left and right singular vectors of $\mathbf{X}^T\mathbf{XW}$. Given $\mathbf{P}$ we can find estimates for $\mathbf{W}$ given the cardinality constraints using the cardinality constraint regression algorithm for detail see (REF: NIEK KATRIJN). The optimization problem in (\ref{ccpca}) is non-convex and meaning there are local minima. In order to deal with that multiple random starts can be used with different initializations of $\mathbf{W}$, the start leading to the lowest evaluation of (\ref{ccpca}) is retained. Typically starting the algorithm with the solution of PCA (e.g. the first $Q$ right singular vectors of $\mathbf{X}$) will lead to smallest optimum.
+In order to get a minimum for (\ref{ccpca}) we need to alternate between the estimation of $\mathbf{W}$ and $\mathbf{P}$. Given $\mathbf{W}$ we can estimate $\mathbf{P}$ by using procruste rotation (REF: Ten_Berge_2005, Zou_2006), $\mathbf{P} = \mathbf{UV}^T$, where $\mathbf{U}$ and $\mathbf{V}$ are the left and right singular vectors of $\mathbf{X}^T\mathbf{XW}$. Given $\mathbf{P}$ we can find estimates for $\mathbf{W}$ given the cardinality constraints using the cardinality constraint regression algorithm for detail see (REF: NIEK KATRIJN). The optimization problem in (\ref{ccpca}) is non-convex meaning there are local minima. In order to deal with that multiple random starts can be used with different initializations of $\mathbf{W}$, the start leading to the lowest evaluation of (\ref{ccpca}) is retained. Typically starting the algorithm with the solution of PCA (e.g. the first $Q$ right singular vectors of $\mathbf{X}$) will lead to smallest optimum.
 
 The main advantage of solving (\ref{ccpca}) is that this model tries to directly tackle the problem of finding the underlying subset of weights, in contrast to the usage of a penalty that shrinks the weights and also induces sparsity such as the LASSO. This approach can lead to better discovery of the underlying weights compared to LASSO (REF: NIEK KATRIJN). Another advantage is that you directly impose cardinality constraints on $\mathbf{W}$. This gives the user total control over the amount of sparsity. This can be desirable if there is already an idea about the level of sparsity in the final model. 
  A disadvantage of using this procedure is that is potentially slow, this because the CCREG algorithm uses a MM-algorithm which tend to be slow in convergence. Another potential downside could be the absence of regularizers, they tend to shrink the variance of the estimators leading to more efficiency. In noisy situations other procedures might outperform this procedure.
@@ -173,12 +175,12 @@ This model has been implemented in the `ccpca` function. This function will be d
 
 ## The implementation in `R` of the `sparseWeightBasedPCA` package
 
-The `sparseWeightBasedPCA` provides functions for the aforementioned models, also model selection procedures are provided in order to tune the hyper parameters. The main functions: `scads, mmsca` and `ccpca` are implemented in `C++` using the packages Rcpp (REF) and RcppArmadillo (REF). The model selection procedures are implemented in `R`.  The functions of the package will be discussed after which detailed examples will be given.
+The `sparseWeightBasedPCA` package provides functions for the aforementioned models. Model selection procedures are also provided in order to tune the hyper parameters. The main functions: `scads, mmsca` and `ccpca` are implemented in `C++` using the packages Rcpp (REF) and RcppArmadillo (REF). The model selection procedures are implemented in `R`.  The functions of the package will be discussed after which detailed examples will be given.
 
 
 ### Implementation of the main functions of the `sparseWeightBasedPCA` package
 
-The main functions: `scads`, `mmsca` and `ccpca` are all implemented in a similar manor. At the core they perform SCA/PCA with variations depending on the goals of the user. An typical minimal use case `scads` given below (`mmsca` and `ccpca` are implemented very similarly) first generate some fake data:
+The main functions: `scads`, `mmsca` and `ccpca` are all implemented in a similar manor. At the core they perform SCA/PCA with variations depending on the goals of the user. An typical minimal example of `scads` given below (`mmsca` and `ccpca` are implemented very similarly) first generate some fake data:
 
 ```{r, eval = FALSE}
 J <- 30
@@ -207,7 +209,7 @@ All the main functions: `scads`, `mmsca` and `ccpca` output a list with the foll
 * `loss` A numeric variable containing the minimum loss function value of all the `nStarts` starts 
 * `converged` A boolean containing `TRUE` if converged `FALSE` if not converged.
 
-Details examples of data analysis will follow in the next section or see the documentation `?scads` et cetera. The main functions `scads`, `mmsca` and `ccpca` have a slightly different set of arguments. See the following list for the specifics.
+Details examples of data analysis will follow in the next section or see the documentation `?scads` et cetera. The main functions `scads`, `mmsca` and `ccpca` have a slightly different set of arguments. See the following lists for the specifics.
 
 #### Overview of the `scads` arguments
 
@@ -256,7 +258,7 @@ Details examples of data analysis will follow in the next section or see the doc
 
 ### Implementation of the model selection functions of the `sparseWeightBasedPCA` package
 
-The to execute the `scads`, `mmsca` and `ccpca` arguments for the hyper parameters need to selected, for example the number of components or values for the `lasso` arguments. The `sparseWeightBasedPCA` package provides three procedures of selecting the hyper-parameters of the model: Cross-validation using the EigenVector method (REF), the Index of Sparseness (IS) and the Bayesian Information Criterion (BIC), for details see (REF). The procedures are implemented with in the functions: `CVforPCAwithSparseWeights`, `ISforPCAwithSparseWeights` and `BICforPCAwithSparseWeights`. They work as follows: first specify the arguments that the model selection function needs, then a pointer to the function that does the analysis should be given in the followed by its arguments. An example is given here:
+The to execute the `scads`, `mmsca` and `ccpca` arguments for the hyper parameters need to selected, for example the number of components or values for the `lasso` arguments. The `sparseWeightBasedPCA` package provides three procedures for selecting the hyper-parameters of the model: Cross-validation using the EigenVector method (REF), the Index of Sparseness (IS) and the Bayesian Information Criterion (BIC), for details see (REF). The procedures are implemented in the functions: `CVforPCAwithSparseWeights`, `ISforPCAwithSparseWeights` and `BICforPCAwithSparseWeights`. They are parametrized as follows, first the arguments specific to the model selection function, followed by a pointer to the function that does the analysis, followed by its arguments. An example is given here:
 
 ```{r, eval = FALSE}
 J <- 30
@@ -291,7 +293,7 @@ Model selection of the hyper-parameters can be based on the model that results i
 
 ### Additional tuning functions for `mmsca`
 
-This package provides more elaborate model selection functions for `mmsca`, because of its flexibility it can be overwhelming to use the basic tuning function provided. Two additional functions are provided `mmscaModelSelection` and `mmscaHyperCubeSelection`. `mmscaModelSelection` uses a fixed grid of all combinations of the hyper-parameters to pick the best combination from, whereas `mmscaHyperCubeSelection` uses an adaptive grid that zooms in on a good combination of hyper-parameters until it converges on a certain combination. Note that `mmscaHyperCubeSelection` is experimental, it could potentially speed up the process of tuning enormously but it has not been scrutinized using a simulation study. A basic example of both is given here:
+This package provides more elaborate model selection functions for `mmsca`, because of its flexibility it can be overwhelming to use the basic tuning function described in the previous section. Therefore two additional functions are provided: `mmscaModelSelection` and `mmscaHyperCubeSelection`. `mmscaModelSelection` uses a fixed grid of all combinations of the hyper-parameters to pick the best combination from, whereas `mmscaHyperCubeSelection` uses an adaptive grid that zooms in on a good combination of hyper-parameters until it converges on a certain combination. Note that `mmscaHyperCubeSelection` is experimental, it could potentially speed up the process of tuning enormously but it has not been scrutinized using a simulation study. A basic example of both is given here:
 
 To perform model selection with `mmsca` using an exhaustive grid of all combinations of the tuning parameters the following can be done: 
 
@@ -334,7 +336,7 @@ This function returns a list with two elements:
     - `"ridge1stdErrorRule"` In case tuningMethod == "CV", the value of the ridge according to the 1 standard error rule: the most sparse model within one standard error of the model with the lowest MSPE
 *  `bestNcomp` The number of component with the best value for the chosen tuning index
  
-For more details `?mmscaModelSelection`. This procedure can be slow because the number of combinations can be great it takes a lot of time to evaluate them all in order to pick the best one. To that end we also provide an alternative way of tuning using `mmscaHyperCubeSelection`. This function tunes a grid of the tuning parameters determine by the min and max of their corresponding sequences and a step size the provided by `stepsize` argument. It picks out the best combination, and zooms in on that combination, by making a new smaller grid around the previous best combination. This process continues until the average range of the sequences is less than 0.05. The new sequences are determined by taking the minimum value to be: best value - range, and maximum value by: best value + range, and a pre-specified step size in `stepsize`. In order for this procedure to work well, the grid needs to include an optimal combination of tuning parameters, and it needs a reasonable step size (at least 3, 5 is better, 2 is too small). This approach assumes that a local optimum of tuning parameters is good enough to get interpretable results. Note that this function is experimental and has not been scrutinized using a simulation study. This procedure can be performed as follows,
+For more details `?mmscaModelSelection`. This procedure can be slow because the number of combinations can be great it takes a lot of time to evaluate them all in order to pick the best one. To that end we also provide an alternative way of tuning using `mmscaHyperCubeSelection`. This function tunes a grid of the tuning parameters determine by the min and max of their corresponding sequences and a step size the provided by `stepsize` argument. It picks out the best combination, and zooms in on that combination, by making a new smaller grid around the previous best combination. This process continues until the average range of the sequences is less than a specified criterion. The new sequences are determined by taking the minimum value to be: best value - range, and maximum value by: best value + range, and a pre-specified step size in `stepsize`. In order for this procedure to work well, the grid needs to include an optimal combination of tuning parameters, and it needs a reasonable step size (at least 3, 5 is better, 2 is too small). This approach assumes that a local optimum of tuning parameters is good enough to get interpretable results. Note that this function is experimental and has not been scrutinized using a simulation study. This procedure can be performed as follows,
 
 ```{r, eval = FALSE}
 
@@ -376,9 +378,12 @@ In this section we will give some detailed examples where we analyze multi- and 
 \end{equation}
 where $\mathbf{W}$ is $J\times J$, $\mathbf{W}^T\mathbf{W} = \mathbf{I}$ and $\mathbf{W} = \mathbf{P}$. $\mathbf{W}$ is manipulated such that it contains a given level of sparsity in the first $Q$ columns. The covariance matrix of $\mathbf{X}$ can be constructed by taking $\mathbf{\Sigma} = \mathbf{W}\mathbf{\Lambda}\mathbf{W}^T$, the eigenvalues in $\mathbf{\Lambda}$ can be manipulated to control the variance of the signal components versus the variance of the noise components. Using the covariance matrix data can be sampled from the multivariate normal distribution using `mvrnorm` from the package MASS (REF). 
 Functions for data generation are provided by: 
+
 * `sparsify` to put sparsity in $\mathbf{W}$
 * `makeVariance` to manipulate the eigenvalues in $\mathbf{\Lambda}$
-* `makeDat` to simulate the data. Check the package documentation for more details.
+* `makeDat` to simulate the data. 
+
+Check the package documentation for more details. In general data are not simulated and need to be pre-processed before hand. The `RegularizedSCA` package (REF) provides functionality for this with `pre_process`, see their documentation for more details.
 
 
 ### Example of SCA with `scads`
@@ -394,6 +399,9 @@ comdis <- matrix(1, J, ncomp) # Component weight structure
 comdis[1:15, 1] <- 0 # The first component is distinctive for the first block
 comdis[16:30, 2] <- 0 # The second component is distinctive for the second block
 comdis <- sparsify(comdis, 0.2) #set 20 percent of the 1's to zero
+
+# inspect the component weight structure, weights indicated with a 1, 
+# will in the data generating model
 comdis
 
 ```
@@ -412,11 +420,14 @@ round(dat$P[, 1:ncomp], 3) # The data generating component weight structure
 
 ```
 
-In the scree plot you can see the eigenvalues of the data generating covariance matrix and `round(dat$P[, 1:ncomp], 3)` prints the data generating component weights for the signal components. Given this generate data set we can perform `scads` by first looking for the common and distinctive structure by trying all structures out and finding the best structure according to model selection, in this case we will use cross-validation. To generate all common and distinctive structures we implemented a function called `allCommonDistinctive` for more details see the documentation.
+In the scree plot you can see the eigenvalues of the data generating covariance matrix and `round(dat$P[, 1:ncomp], 3)` prints the data generating component weights for the signal components. 
 
-```{r, eval = FALSE}
+Given this generate data set we can perform `scads` by first looking for the common and distinctive structure by trying all structures out and finding the best structure according to model selection, in this case we will use cross-validation. To generate all common and distinctive structures we implemented a function called `allCommonDistinctive` for more details see the documentation.
+
+```{r, eval = TRUE}
 # Generate all possible common and distinctive structures
-allstructures <- allCommonDistinctive(vars = c(15, 15), ncomp = 3, allPermutations = TRUE, filterZeroSegments = TRUE)
+allstructures <- allCommonDistinctive(vars = c(15, 15), 
+                      ncomp = 3, allPermutations = TRUE, filterZeroSegments = TRUE)
 
 #Use cross-validation to look for the data generating structure 
 index <- rep(NA, length(allstructures))
@@ -432,11 +443,12 @@ allstructures[[which.min(index)]] # print the best common and distinctive struct
 
 ```
 
-Given this common and distinctive structure we can tune the `lasso` parameter to get some sparsity inside the weights, for this we will use cross validation with the one standard error rule. This entails cross validating the model a bunch of times for different values of the `lasso` parameter, from which we will select the model with the most weights at zero still within one standard error of the model with the least mean squared prediction error (MSPE). If there are not models within one standard error of the best model you should decrease the step size of the lasso sequence.
+Given this common and distinctive structure we can tune the `lasso` parameter in order to get some sparsity inside the weights, for this we will use cross-validation with the one standard error rule. This entails cross validating the model a bunch of times for different values of the `lasso` parameter, from which we will select the model with the most weights at zero still within one standard error of the model with the lowest mean squared prediction error (MSPE). If there are no models within one standard error of the best model you should decrease the step size of the LASSO sequence.
 
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 
-lasso <- exp(seq(log(0.0000001), log(1), length.out = 100)) # Generate candidate lasso values
+# Generate candidate lasso values on the log-scale
+lasso <- exp(seq(log(0.0000001), log(1), length.out = 100)) 
 MSPE <- rep(NA, length(lasso))
 MSPEstdError <- rep(NA, length(lasso))
 nNonZeroCoef <- rep(NA, length(lasso))
@@ -484,9 +496,9 @@ This procedure offers lots of flexibility to the user at the cost of a little mo
 
 ### Example of SCA with `mmsca`
 
-We will now demonstrate data analysis using `mmsca`. In this example we will use the same data as in the `scads` example. We will demonstrate the use of `mmscaHyperCubeSelection` as already for this toy-example tuning an exhaustive grid with `mmscaModelSelection` takes too long. Here we also use cross validation with the one standard error rule.
+We will now demonstrate data analysis of multi-block data using `mmsca`. In this example we will use the same data as in the `scads` example. We will demonstrate the use of `mmscaHyperCubeSelection` as already for this toy-example tuning an exhaustive grid with `mmscaModelSelection` takes too long. We use cross validation with the one standard error rule.
 
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 
 # Tune the hyper parameters by looking at an adaptive grid that zooms in around plausible values
 out <- mmscaHyperCubeSelection(X,
@@ -535,7 +547,7 @@ round(compare, 3)
 
 This conclude the demonstration. We now demonstrate another interesting use case for `mmsca` where a researcher wants to identifying common and distinctive components and where an exhaustive approach might fail because there are too many data blocks and components. We use multi-block data with 5 blocks and 5 variables per block and 5 components.
 
-```{r}
+```{r, eval = TRUE}
 
 # Generate the data
 set.seed(1)
@@ -580,7 +592,7 @@ out <- mmscaHyperCubeSelection(X,
               nrFolds = 10)
 
 # Inspect the chosen group lasso 
-out
+out$grouplasso
 
 # Run the analysis
 results <- mmsca(X = X, 
@@ -596,18 +608,108 @@ results <- mmsca(X = X,
                 nStarts = 1,
                 printLoss = FALSE)
 
+
 # Check results from the analysis
 colnames(results$W) <- paste("Est W_", 1:5, sep = "")
 rownames(results$W) <- paste("Var", 1:30) 
 round(results$W, 3)
 
+# You can compare them to the data generating structure
+round(dat$P[, 1:ncomp], 3)
 ```
 
-The data generating structure has been estimated back well. You can see some small coefficients still being estimated, if you increase the `grouplasso` these small coefficients will be put to zero. 
+The data generating structure has been estimated back fairly well. Note not all segments have been recovered. If a segments does not really contribute or only contributes marginally to the signal variance, it can be put to zero by the group lasso. You can also notice some small coefficients still being estimated, if you increase the `grouplasso` these small coefficients will be put to zero. 
 
 
 ### Example of PCA with `ccpca`
 
+Here we will demonstrate data analysis using `ccpca`. In this example we will have just 1 data blocks each with 30 variables and 3 components. Here we demonstrate the use case for `ccpca` where the underlying model is rather sparse, and we already assume the model is sparse and we ball park the sparsity.
 
+```{r}
+
+set.seed(1)
+ncomp <- 3 
+J <- 30
+comdis <- matrix(1, J, ncomp) # Component weight structure
+comdis <- sparsify(comdis, 0.8) #set 80 percent of the 1's to zero
+comdis
+
+variances <- makeVariance(varianceOfComps = c(100, 80, 90), 
+                          J = J, error = 0.05) #create realistic eigenvalues
+dat <- makeDat(n = 100, comdis = comdis, variances = variances)
+X <- dat$X
+round(dat$P[, 1:ncomp], 3) # The data generating component weight structure
+
+# We can ball park the number of zeros and can get pretty good results
+results <- ccpca(X = X, ncomp = ncomp,  nzeros = c(20, 20, 20), itr = 10000000, 
+   Wstart = matrix(0, J, ncomp), nStarts = 1, tol = 10^-8, printLoss = FALSE)
+
+# Compare the results
+compare <- cbind(dat$P[, 1:ncomp], results$W)
+colnames(compare) <- c(paste("True W_", 1:3, sep = ""), paste("Est W_", 1:3, sep = ""))
+rownames(compare) <- paste("Var", 1:30) 
+round(compare, 3)
+
+```
+
+The estimation results are similar to the data generating model, this shows you do not have to know the number of zero weights before hand in order to get interpretable results. That being said, it should preferably in the ball park of what it should really be. In order to examine that in more detail we will now provide an example of model selection with `ccpca` also in this example we use cross-validation with the one standard error rule. 
+
+
+```{r}
+
+# Cross validate the number of non-zero weights per component weight vector
+# Note: we assume the sparsity within the columns of W to be the same
+nzeros <- rep(15:29, each = ncomp)
+nzeros <- split(nzeros, ceiling(seq_along(nzeros) / ncomp))
+
+MSPE <- rep(NA, length(nzeros))
+MSPEstdError <- rep(NA, length(nzeros))
+nNonZeroCoef <- rep(NA, length(nzeros))
+
+for (i in 1:length(nzeros)) {
+    res <- CVforPCAwithSparseWeights(X = X, nrFolds = 10, FUN = ccpca, 
+                  ncomp = ncomp,  nzeros = nzeros[[i]], itr = 10000000, 
+                  Wstart = matrix(0, J, ncomp), nStarts = 1, tol = 10^-5, printLoss = FALSE)
+
+    MSPE[i] <- res$MSPE # Store MSPE for each lasso value
+    MSPEstdError[i] <- res$MSPEstdError # Store the standard error of the MSPE
+    nNonZeroCoef[i] <- res$nNonZeroCoef # Store the number of non-zero weights
+}
+
+
+x <- 15:29 
+plot(x , MSPE, xlab = "number of zeros", ylab = "MSPE",
+     main = "MSPE with one standard error for different lasso values")
+
+# Add error bars to the plot
+arrows(x, MSPE - MSPEstdError, x , MSPE + MSPEstdError, length = 0.05, angle = 90, code = 3)
+
+# Select all models within one standard error of the best model
+eligibleModels <- MSPE < MSPE[which.min(MSPE)] + MSPEstdError[which.min(MSPE)]
+eligibleModels
+
+# Selected from those models the models with the lowest number of non-zero weights
+best <- which.min(nNonZeroCoef[eligibleModels])
+
+# The number of zero weights per component that was "best"
+nzeros[[best]]
+
+results <- ccpca(X = X, ncomp = ncomp,  nzeros = nzeros[[best]], itr = 10000000, 
+   Wstart = matrix(0, J, ncomp), nStarts = 1, tol = 10^-8, printLoss = FALSE)
+
+
+compare <- cbind(dat$P[, 1:ncomp], results$W)
+colnames(compare) <- c(paste("True W_", 1:3, sep = ""), paste("Est W_", 1:3, sep = ""))
+rownames(compare) <- paste("Var", 1:30) 
+round(compare, 3)
+
+```
+
+Doing the model selection procedure gives the user a pretty good idea what number of zero weights is plausible. The results of the estimation using cross-validation with the one standard error rule are very similar the to one where we ball parked the number of zero weights.
+
+
+## Conclusion
+
+The `sparseWeightBasedPCA` provides flexible analysis tools to perform SCA and PCA on multi- or single block data with sparsity in the component weights. Model selection tools are provided to select the hyper-parameters of these models. Future research, should focus on selecting the regularization parameters together with the number of components.  Although doable with this package it is still too computationally demanding for most practical use cases, the user is better of sticking to using a scree-plots or use `CVforPCAwithSparseWeights` to determine the number of components before tuning the other hyper parameters. Furthermore this package includes `mmscaHyperCubeSelection` a promising procedure of doing model selection because of its speed and ability to examine an enormous grid of potential candidate values for the hyper parameter, however it still needs to be properly examined using a simulation study in further research.
 
 
